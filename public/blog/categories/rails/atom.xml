@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Tsubasa Furukawa | Web Developer in Training]]></title>
-  <link href="http://www.tsufurukawa.herokuapp.com/atom.xml" rel="self"/>
+  <title><![CDATA[Category: Rails | Tsubasa Furukawa | Web Developer in Training]]></title>
+  <link href="http://www.tsufurukawa.herokuapp.com/blog/categories/rails/atom.xml" rel="self"/>
   <link href="http://www.tsufurukawa.herokuapp.com/"/>
   <updated>2014-05-08T01:34:43-07:00</updated>
   <id>http://www.tsufurukawa.herokuapp.com/</id>
