@@ -1,27 +1,27 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>
     <url>
-        <loc>http://www.tsufurukawa.herokuapp.com/blog/2014/05/08/my-first-post/</loc>
+        <loc>http://tsufurukawa-blog.herokuapp.com/blog/2014/05/08/my-first-post/</loc>
         <lastmod>2014-05-09T17:02:00-07:00</lastmod>
     </url>
     <url>
-        <loc>http://www.tsufurukawa.herokuapp.com/blog/2014/05/08/rails-resources/</loc>
+        <loc>http://tsufurukawa-blog.herokuapp.com/blog/2014/05/08/rails-resources/</loc>
         <lastmod>2014-05-09T17:01:49-07:00</lastmod>
     </url>
     <url>
-        <loc>http://www.tsufurukawa.herokuapp.com/blog/2014/05/09/part-ii/</loc>
-        <lastmod>2014-05-09T17:15:03-07:00</lastmod>
+        <loc>http://tsufurukawa-blog.herokuapp.com/blog/2014/05/09/part-ii/</loc>
+        <lastmod>2014-05-09T17:51:41-07:00</lastmod>
     </url>
     <url>
-        <loc>http://www.tsufurukawa.herokuapp.com/blog/archives/</loc>
-        <lastmod>2014-05-09T17:15:03-07:00</lastmod>
+        <loc>http://tsufurukawa-blog.herokuapp.com/blog/archives/</loc>
+        <lastmod>2014-05-09T17:51:41-07:00</lastmod>
     </url>
     <url>
-        <loc>http://www.tsufurukawa.herokuapp.com/</loc>
-        <lastmod>2014-05-09T17:15:03-07:00</lastmod>
+        <loc>http://tsufurukawa-blog.herokuapp.com/</loc>
+        <lastmod>2014-05-09T17:51:41-07:00</lastmod>
     </url>
     <url>
-        <loc>http://www.tsufurukawa.herokuapp.com/robots.txt</loc>
+        <loc>http://tsufurukawa-blog.herokuapp.com/robots.txt</loc>
         <lastmod>2014-05-08T01:11:56-07:00</lastmod>
     </url>
 </urlset>

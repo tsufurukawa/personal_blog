@@ -1,4 +1,4 @@
 User-agent: *
 Disallow: 
 
-Sitemap: http://www.tsufurukawa.herokuapp.com/sitemap.xml 
+Sitemap: http://tsufurukawa-blog.herokuapp.com/sitemap.xml 
