@@ -49,7 +49,7 @@ Every controller action maps to a respective view template (unless of course we 
 
 All partial files are named with a preceding underscore (again by convention), but strangely enough whenever we render the partial, it is called without the underscore, as shown by the top code. We are also passing a local variable `title` into the partial, which allows us to render code across multiple files that is similar in structure, but varies in content. Specifically, we can call this partial from any view file (such as show.html.erb or edit.html.erb), and by passing in different values for `title` we can render dynamic content while maintaining the structure of having the single `h4` and `p` tags.
 
-****To Be Continued
+####To Be Continued
 
 Since this post is getting WAAAY longer than I anticipated, I will continue this discussion on partials and how Rails convention can get a little convoluted on the next post. 
 
