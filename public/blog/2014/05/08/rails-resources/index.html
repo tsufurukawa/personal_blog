@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Tsubasa Furukawa | Web Developer in Training</title>
+  <title>Part I: Rails Conventions - Tsubasa Furukawa | Web Developer in Training</title>
   <meta name="author" content="Tsubasa Furukawa">
 
   
-  <meta name="description" content="In the previous post we saw that we can pass in a file name such as shared/content_file into a partial, which will then render the _content_file.html &hellip;">
+  <meta name="description" content="Some Basic Rails Conventions Now, let&rsquo;s talk Rails. Rails is&hellip;interesting, to say the least. It&rsquo;s only been a week since I&rsquo;ve &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://www.tsufurukawa.herokuapp.com">
+  <link rel="canonical" href="http://www.tsufurukawa.herokuapp.com/blog/2014/05/08/rails-resources">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="Tsubasa Furukawa | Web Developer in Training" type="application/atom+xml">
@@ -63,111 +63,12 @@
 </nav>
   <div id="main">
     <div id="content">
-      <div class="blog-index">
+      <div>
+<article class="hentry" role="article">
   
-  
-  
-    <article>
-      
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/05/09/part-ii/">Part II - Rails Convention</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-09T11:38:40-07:00" pubdate data-updated="true">May 9<span>th</span>, 2014</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>In the previous post we saw that we can pass in a file name such as <code>shared/content_file</code> into a partial, which will then render the <code>_content_file.html.erb</code> file allowing us to create content that is shared amongst many pages in our application. We can also pass in a local variable such as <code>title</code> containing dynamic data that can change depending on what value we assign to the variable.</p>
-
-<h4>Rendering Model Instances</h4>
-
-<p>Things can get quite interesting when we pass in instance model objects to the partial. An example is taken from <a href="http://guides.rubyonrails.org/layouts_and_rendering.html">Rails Guide</a>. Here <code>@customer</code> is an instance of the <code>Customer</code> model, which could&rsquo;ve been defined somewhere in the <code>CustomersController</code> like this <code>@customer = Customer.first</code>.</p>
-
-<figure class='code'><figcaption><span>Ex 1: Rendering Instance Objects (Simplified Way)</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='erb'><span class='line'><span class="cp">&lt;%=</span> <span class="n">render</span> <span class="vi">@customer</span> <span class="cp">%&gt;</span><span class="x"></span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>This code will render the partial <code>_customer.html.erb</code> inside <code>views/customers/customer</code> and will &ldquo;pass the local variable <code>customer</code> into the partial which will refer to the <code>@customer</code> in the parent view.&rdquo; Sounds complicated? Well yes, because it is! Essentially the above can be replaced by the following code, with syntax that we are slightly more familiar with.</p>
-
-<figure class='code'><figcaption><span>Ex 2: Rendering Instance Objects (Explicit Way)</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='erb'><span class='line'><span class="cp">&lt;%=</span> <span class="n">render</span> <span class="s1">&#39;customers/customer&#39;</span><span class="p">,</span> <span class="ss">customer</span><span class="p">:</span> <span class="vi">@customer</span> <span class="cp">%&gt;</span><span class="x">  </span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>By convention, when we pass in a model instance object, Rails expects the partial to be named after the model (preceded with an underscore) placed inside a directory with a lowercase plural form of the model name (i.e. <code>customers</code>) &ndash; and this is precisely what we see in <em>Ex 2</em>. For the second argument, Rails created a local variable (named after the object model), and set it to the <code>@customer</code> instance variable. In a nutshell, Ex 1 is what we call <em>syntactic sugar</em> that saves us a few extra keystrokes.</p>
-
-<h4>Rendering Collections (Array of Objects)</h4>
-
-<p>Finally, let&rsquo;s say we have an array of objects (aka &lsquo;collection&rsquo;) that we would like to pass in to a partial, so that we can render content dynamically based on data encapsulated within the individual objects. Here is how we might initially approach this problem.</p>
-
-<figure class='code'><figcaption><span>Ex 3: Rendering Collections (Long Way)</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='erb'><span class='line'><span class="cp">&lt;%</span> <span class="n">categories</span> <span class="o">=</span> <span class="no">Category</span><span class="o">.</span><span class="n">all</span> <span class="cp">%&gt;</span><span class="x"></span>
-</span><span class='line'><span class="cp">&lt;%</span> <span class="n">categories</span> <span class="k">do</span> <span class="o">|</span><span class="n">category</span><span class="o">|</span> <span class="cp">%&gt;</span><span class="x"></span>
-</span><span class='line'><span class="x">  </span><span class="cp">&lt;%=</span> <span class="n">render</span> <span class="s1">&#39;categories/category&#39;</span><span class="p">,</span> <span class="ss">category</span><span class="p">:</span> <span class="n">category</span> <span class="cp">%&gt;</span><span class="x"></span>
-</span><span class='line'><span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span><span class="x"></span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p></p>
-
-<figure class='code'><figcaption><span>Ex 4: Inside Partial (located inside app/views/categories/_category.html.erb) </span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='erb'><span class='line'><span class="x">&lt;p&gt;This is the category name that changes depending on the objects that are passed in: </span><span class="cp">&lt;%=</span> <span class="n">category</span><span class="o">.</span><span class="n">name</span> <span class="cp">%&gt;</span><span class="x">&lt;/p&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>By now, Ex 3 should be fairly comprehensible. <code>categories</code> is a collection of <code>category</code> instances. We iterate through the collection, and for every object, we render the partial while passing in the individual <code>category</code> instances that are assigned to a <code>category</code> local variable. Then inside the partial template, we can use the <code>category</code> local variable and extract attributes such as <code>name</code> from the object that the local variable is referencing.</p>
-
-<p>Just like everything else in Rails, it turns out there is a shorthand syntax for this.</p>
-
-<figure class='code'><figcaption><span>Ex 5: Rendering Collections (Short Way)</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='erb'><span class='line'><span class="cp">&lt;%=</span> <span class="n">categories</span> <span class="o">=</span> <span class="no">Category</span><span class="o">.</span><span class="n">all</span> <span class="cp">%&gt;</span><span class="x"></span>
-</span><span class='line'><span class="cp">&lt;%=</span> <span class="n">render</span> <span class="n">categories</span> <span class="cp">%&gt;</span><span class="x"></span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>That&rsquo;s it!!! Nice and clean. First, Rails recognizes that <code>categories</code> is a collection of objects from the <code>Category</code> model. Second, Rails determines the name of the partial to use by looking at the model name in the collection. Lastly, Rails allows access to each member of the collection, within individual instances of the partial, by assigning each member to a local variable named after the partial. Hence, the code in Ex 5 is entirely identical to the one in Ex 3. Rails Magic!!</p>
-
-<h4>Aside</h4>
-
-<p>Here is another quote I like that I once heard from Jeff Van Gundy, color commentator for ESPN. It turns out it was originally quoted by Ralph Waldo Emerson.</p>
-
-<blockquote><p>“Your actions speak so loudly, I cannot hear what you are saying.”
-<cite><sub> &ndash; Ralph Waldo Emerson</sub></cite></p></blockquote>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/08/rails-resources/">Part I: Rails Conventions</a></h1>
+      <h1 class="entry-title">Part I: Rails Conventions</h1>
     
     
       <p class="meta">
@@ -190,7 +91,7 @@
   </header>
 
 
-  <div class="entry-content"><h4>Some Basic Rails Conventions</h4>
+<div class="entry-content"><h4>Some Basic Rails Conventions</h4>
 
 <p>Now, let&rsquo;s talk Rails. Rails is&hellip;interesting, to say the least. It&rsquo;s only been a week since I&rsquo;ve been exposed to the core ideology behind Rails, so I am far from knowing the ins and outs of the language. Rails is centered around the paradigm of <em>Convention Over Configuration</em>, which in layman&rsquo;s terms &ndash; follow the convention and you&rsquo;ll be grateful, and you&rsquo;re screwed if you don&rsquo;t. I think these conventions are what makes everything in Rails seem so magical, while simultaneously confusing. Until you wrap your head around the fact that a lot goes behind the scenes and some things you just have to take for granted, learning Rails can be quite a challenge.</p>
 
@@ -258,22 +159,16 @@
 
 <p>I&rsquo;ve been digressing quite a bit, but quite frankly, I&rsquo;m starting to enjoy this process of articulating technical concepts because it helps me get accustomed to the web development / programming jargon, which is so So SO important in communicating with fellow developers. Anyways, in the next post I will discuss partials in greater detail and how Rails convention can get a little convoluted.</p>
 </div>
-  
-  
 
 
-    </article>
-  
-  
-    <article>
+  <footer>
+    <p class="meta">
       
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/08/my-first-post/">My First Blog Post</a></h1>
-    
-    
-      <p class="meta">
-        
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Tsubasa Furukawa</span></span>
+
+      
 
 
 
@@ -285,40 +180,38 @@
   
 
 
-<time datetime="2014-05-08T01:24:34-07:00" pubdate data-updated="true">May 8<span>th</span>, 2014</time>
-        
-      </p>
+<time datetime="2014-05-08T22:33:15-07:00" pubdate data-updated="true">May 8<span>th</span>, 2014</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/rails/'>Rails</a>, <a class='category' href='/blog/categories/rails-convention/'>Rails Convention</a>
+  
+</span>
+
+
+    </p>
     
-  </header>
-
-
-  <div class="entry-content"><h4>A Little About Me</h4>
-
-<p>I&rsquo;m a basketball guy. I love playing ball, I love watching the Lakers, and I love playing fantasy basketball. In fact I love basketball so much that I&rsquo;m doing just that as I&rsquo;m writing this blog &ndash; watching Game 2 of Portland vs. San Antonio series. Well, it turns out my sentiments towards programming is just about the opposite. Or more precisely, it <em>was</em>. When I took my first progamming class 6 years ago, I was so lost, so frustrated and so annoyed, that I ended up with a C in the class. A <strong>C!!!!</strong> Granted, it was a C++ course, which by far is the hardest language I&rsquo;ve ever learned (let&rsquo;s face it, it&rsquo;s like Ruby on steroids), but to a guy who&rsquo;s never seen that infamous letter all throughout his educational career, getting a C was as big a surprise as the Spurs losing Game 6 of last year&rsquo;s NBA finals. Pardon me if I sounded a bit nerdy there. Point is, programming and I were like oil and water. We just didn&rsquo;t mix.</p>
-
-<p>But here I am today, 5 weeks into an online Ruby on Rails Bootcamp called Tealeaf Academy. And frankly, I&rsquo;m loving every second of it. How I got here is a whole another story of it&rsquo;s own, but dedicating myself to learn web development is one of the best choices I&rsquo;ve made. In this short amount of time, Tealeaf has already provided me with a foundational knowledge in Ruby, web development, Rails, and more importantly, an appreciation, and at times enjoyment, for the art of coding. In 5 weeks!! Crazy!! And the journey&rsquo;s just begun.</p>
-
-<p>This blog is to record the random tidbits of knowlege that I acquire from this course. I&rsquo;m hoping this acts as not only a mnemonic device for myself, but also as an yearbook of some sort &ndash; something I can look back on ten years from now and reminisce about how ignorant I was and realize how much I have grown since those days. We&rsquo;ll see how dedicated I am in keeping this blog up-to-date, but I&rsquo;m genuinely excited to see how my career as a web developer will unfold.</p>
-
-<h4>Aside</h4>
-
-<p>I&rsquo;m actually a big quote guy as well. Here is a quote that really reasonates with me, by the great Mahatma Gandhi and popularized by the equally great Coach John Wooden.</p>
-
-<blockquote><p>“Live as if you were to die tomorrow. Learn as if you were to live forever.”
-<cite><sub> &ndash; Mahatma Gandhi</sub></cite></p></blockquote>
+      <div class="sharing">
+  
+  
+  
 </div>
-  
-  
 
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/05/08/my-first-post/" title="Previous Post: My First Blog Post">&laquo; My First Blog Post</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2014/05/09/part-ii/" title="Next Post: Part II - Rails Convention">Part II - Rails Convention &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
 
-    </article>
-  
-  <div class="pagination">
-    
-    <a href="/blog/archives">Blog Archives</a>
-    
-  </div>
 </div>
+
 <aside class="sidebar">
   
     <section>
@@ -343,7 +236,7 @@
 <section>
   <h1>GitHub Repos</h1>
   <ul id="gh_repos">
-    <li class="loading">Status updating&#8230;</li>
+    <li class="loading">Status updating...</li>
   </ul>
   
   <a href="https://github.com/tsufurukawa">@tsufurukawa</a> on GitHub
@@ -375,6 +268,7 @@
 
   
 </aside>
+
 
     </div>
   </div>

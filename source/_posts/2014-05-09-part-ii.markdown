@@ -1,0 +1,68 @@
+---
+layout: post
+title: "Part II - Rails Convention"
+date: 2014-05-09 11:38:40 -0700
+comments: true
+categories: [Rails, Rails Convention]
+---
+
+In the previous post we saw that we can pass in a file name such as `shared/content_file` into a partial, which will then render the `_content_file.html.erb` file allowing us to create content that is shared amongst many pages in our application. We can also pass in a local variable such as `title` containing dynamic data that can change depending on what value we assign to the variable.   
+
+####Rendering Model Instances
+
+Things can get quite interesting when we pass in instance model objects to the partial. An example is taken from [Rails Guide](http://guides.rubyonrails.org/layouts_and_rendering.html). Here `@customer` is an instance of the `Customer` model, which could've been defined somewhere in the `CustomersController` like this `@customer = Customer.first`. 
+
+```erb Ex 1: Rendering Instance Objects (Simplified Way)
+<%= render @customer %>
+```
+
+This code will render the partial `_customer.html.erb` inside `views/customers/customer` and will "pass the local variable `customer` into the partial which will refer to the `@customer` in the parent view." Sounds complicated? Well yes, because it is! Essentially the above can be replaced by the following code, with syntax that we are slightly more familiar with.
+
+```erb Ex 2: Rendering Instance Objects (Explicit Way)
+<%= render 'customers/customer', customer: @customer %>  
+```
+
+By convention, when we pass in a model instance object, Rails expects the partial to be named after the model (preceded with an underscore) placed inside a directory with a lowercase plural form of the model name (i.e. `customers`) - and this is precisely what we see in *Ex 2*. For the second argument, Rails created a local variable (named after the object model), and set it to the `@customer` instance variable. In a nutshell, Ex 1 is what we call *syntactic sugar* that saves us a few extra keystrokes. 
+
+####Rendering Collections (Array of Objects)
+
+Finally, let's say we have an array of objects (aka 'collection') that we would like to pass in to a partial, so that we can render content dynamically based on data encapsulated within the individual objects. Here is how we might initially approach this problem. 
+
+```erb Ex 3: Rendering Collections (Long Way)
+<% categories = Category.all %>
+<% categories do |category| %>
+  <%= render 'categories/category', category: category %>
+<% end %>
+``` 
+
+```erb Ex 4: Inside Partial (located inside app/views/categories/_category.html.erb) 
+<p>This is the category name that changes depending on the objects that are passed in: <%= category.name %></p>
+```
+
+By now, Ex 3 should be fairly comprehensible. `categories` is a collection of `category` instances. We iterate through the collection, and for every object, we render the partial while passing in the individual `category` instances that are assigned to a `category` local variable. Then inside the partial template, we can use the `category` local variable and extract attributes such as `name` from the object that the local variable is referencing. 
+
+Just like everything else in Rails, it turns out there is a shorthand syntax for this. 
+
+```erb Ex 5: Rendering Collections (Short Way)
+<%= categories = Category.all %>
+<%= render categories %>
+```
+
+That's it!!! Nice and clean. First, Rails recognizes that `categories` is a collection of objects from the `Category` model. Second, Rails determines the name of the partial to use by looking at the model name in the collection. Lastly, Rails allows access to each member of the collection, within individual instances of the partial, by assigning each member to a local variable named after the partial. Hence, the code in Ex 5 is entirely identical to the one in Ex 3. Rails Magic!!
+
+####Aside
+Here is another quote I like that I once heard from Jeff Van Gundy, color commentator for ESPN. It turns out it was originally quoted by Ralph Waldo Emerson. 
+
+> “Your actions speak so loudly, I cannot hear what you are saying.” 
+> <cite><sub> - Ralph Waldo Emerson</sub></cite>  
+
+
+  
+
+
+
+
+
+
+
+
