@@ -5,7 +5,7 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Part II - Rails Convention - Tsubasa Furukawa | Web Developer in Training</title>
+  <title>Part II - Rails Conventions - Tsubasa Furukawa | Web Developer in Training</title>
   <meta name="author" content="Tsubasa Furukawa">
 
   
@@ -68,7 +68,7 @@
   
   <header>
     
-      <h1 class="entry-title">Part II - Rails Convention</h1>
+      <h1 class="entry-title">Part II - Rails Conventions</h1>
     
     
       <p class="meta">
@@ -91,11 +91,11 @@
   </header>
 
 
-<div class="entry-content"><p>In the previous post we saw that we can pass in a file name such as <code>shared/content_file</code> into a partial, which will then render the <code>_content_file.html.erb</code> file allowing us to create content that is shared amongst many pages in our application. We can also pass in a local variable such as <code>title</code> containing dynamic data that can change depending on what value we assign to the variable.</p>
+<div class="entry-content"><p>In the previous post we saw that we can pass in a file name such as <code>shared/content_file</code> into a partial, which will then render the <code>_content_file.html.erb</code> file allowing us to create content that is shared among many pages in our application. We can also pass in a local variable such as <code>title</code>, containing dynamic data that changes depending on what value we assign to the variable.</p>
 
 <h4>Rendering Model Instances</h4>
 
-<p>Things can get quite interesting when we pass in instance model objects to the partial. An example is taken from <a href="http://guides.rubyonrails.org/layouts_and_rendering.html">Rails Guide</a>. Here <code>@customer</code> is an instance of the <code>Customer</code> model, which could&rsquo;ve been defined somewhere in the <code>CustomersController</code> like this <code>@customer = Customer.first</code>.</p>
+<p>Things can get quite interesting when we pass in model instances to the partial. An example is taken from <a href="http://guides.rubyonrails.org/layouts_and_rendering.html">Rails Guide</a>. Here <code>@customer</code> is an instance of the <code>Customer</code> model, which could&rsquo;ve been defined somewhere in the <code>CustomersController</code> like this <code>@customer = Customer.first</code>.</p>
 
 <figure class='code'><figcaption><span>Ex 1: Rendering Instance Objects (Simplified Way)</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 </pre></td><td class='code'><pre><code class='erb'><span class='line'><span class="cp">&lt;%=</span> <span class="n">render</span> <span class="vi">@customer</span> <span class="cp">%&gt;</span><span class="x"></span>
@@ -109,11 +109,11 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>By convention, when we pass in a model instance object, Rails expects the partial to be named after the model (preceded with an underscore) placed inside a directory with a lowercase plural form of the model name (i.e. <code>customers</code>) &ndash; and this is precisely what we see in <em>Ex 2</em>. For the second argument, Rails created a local variable (named after the object model), and set it to the <code>@customer</code> instance variable. In a nutshell, Ex 1 is what we call <em>syntactic sugar</em> that saves us a few extra keystrokes.</p>
+<p>By convention, when we pass in a model instance to a partial, Rails expects the partial to be named after the model (preceded with an underscore) placed inside a directory with a lowercase plural form of the model name (i.e. <code>customers</code>) &ndash; and this is precisely what we see in <em>Ex 2</em>. For the second argument, Rails created a local variable (named after the object model), and set it to the <code>@customer</code> instance variable. In a nutshell, Ex 1 is what we call <em>syntactic sugar</em> that saves us a few extra keystrokes.</p>
 
 <h4>Rendering Collections (Array of Objects)</h4>
 
-<p>Finally, let&rsquo;s say we have an array of objects (aka &lsquo;collection&rsquo;) that we would like to pass in to a partial, so that we can render content dynamically based on data encapsulated within the individual objects. Here is how we might initially approach this problem.</p>
+<p>Finally, let&rsquo;s say we have an array of objects (aka <em>collection</em>) that we would like to pass in to a partial, so that we can render content dynamically based on data encapsulated within the individual objects. Here is how we might initially approach this problem.</p>
 
 <figure class='code'><figcaption><span>Ex 3: Rendering Collections (Long Way)</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -133,7 +133,7 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>By now, Ex 3 should be fairly comprehensible. <code>categories</code> is a collection of <code>category</code> instances. We iterate through the collection, and for every object, we render the partial while passing in the individual <code>category</code> instances that are assigned to a <code>category</code> local variable. Then inside the partial template, we can use the <code>category</code> local variable and extract attributes such as <code>name</code> from the object that the local variable is referencing.</p>
+<p>By now, Ex 3 should be fairly comprehensible. <code>categories</code> is a collection of <code>category</code> instances. We iterate through the collection, and for every iteration, we render the partial while passing in the <code>category</code> local variable. Then inside the partial template, we can use the <code>category</code> local variable and extract attributes such as <code>name</code> from the object that the local variable is referencing.</p>
 
 <p>Just like everything else in Rails, it turns out there is a shorthand syntax for this.</p>
 
@@ -148,7 +148,7 @@
 
 <h4>Aside</h4>
 
-<p>Here is another quote I like that I once heard from Jeff Van Gundy, color commentator for ESPN. It turns out it was originally quoted by Ralph Waldo Emerson.</p>
+<p>Here is another quote I like that I once heard from Jeff Van Gundy, color commentator for ESPN. It turns out thoough, it was originally quoted by Ralph Waldo Emerson.</p>
 
 <blockquote><p>“Your actions speak so loudly, I cannot hear what you are saying.”
 <cite><sub> &ndash; Ralph Waldo Emerson</sub></cite></p></blockquote>
@@ -217,7 +217,7 @@
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2014/05/09/part-ii/">Part II - Rails Convention</a>
+        <a href="/blog/2014/05/09/part-ii/">Part II - Rails Conventions</a>
       </li>
     
       <li class="post">

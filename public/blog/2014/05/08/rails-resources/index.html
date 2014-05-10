@@ -93,9 +93,9 @@
 
 <div class="entry-content"><h4>Some Basic Rails Conventions</h4>
 
-<p>Now, let&rsquo;s talk Rails. Rails is&hellip;interesting, to say the least. It&rsquo;s only been a week since I&rsquo;ve been exposed to the core ideology behind Rails, so I am far from knowing the ins and outs of the language. Rails is centered around the paradigm of <em>Convention Over Configuration</em>, which in layman&rsquo;s terms &ndash; follow the convention and you&rsquo;ll be grateful, and you&rsquo;re screwed if you don&rsquo;t. I think these conventions are what makes everything in Rails seem so magical, while simultaneously confusing. Until you wrap your head around the fact that a lot goes behind the scenes and some things you just have to take for granted, learning Rails can be quite a challenge.</p>
+<p>Now, let&rsquo;s talk Rails. Rails is&hellip;interesting, to say the least. It&rsquo;s only been a week since I&rsquo;ve been exposed to the core ideology behind Rails, so I am far from knowing the ins and outs of the language. Rails is centered around the paradigm of <em>Convention Over Configuration</em>, which in layman&rsquo;s terms &ndash; follow the convention and you&rsquo;ll be grateful, and you&rsquo;re screwed if you don&rsquo;t. I think these conventions are what makes everything in Rails seem so magical, while simultaneously confusing. Until you wrap your head around the fact that a lot goes behind the scenes and some things you just have to take for granted, learning Rails could be quite a challenge.</p>
 
-<p>Here, I present some crazy conventions that I encountered and had difficult time digesting; thus, I deemed important to take note.</p>
+<p>Here, I present some crazy conventions that I encountered and initially had difficult time digesting; thus, I deemed important to take note.</p>
 
 <p>In Rails (or any MVC framework for that matter), the <em>View</em> contains the content that will be rendered and returned to the browser as part of the HTTP response. An example erb template and the controller that renders the template, are shown below:</p>
 
@@ -125,9 +125,9 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>Here the <code>PostsController</code> is extracting all <code>Post</code> instances stored in the database called <code>posts</code> (named in such way by convention) and storing it in an instance variable called <code>@posts</code> allowing the erb template to access the data without directly communicating with the Model / Database layer. The template can then iterate through the <code>Post</code> objects and display the data contained within those objects (which are essentially table rows when speaking on the database layer). So far, so good.</p>
+<p>Here the <code>PostsController</code> is extracting all <code>Post</code> instances stored in the database called <code>posts</code> (named in such way by convention) and storing it in an instance variable called <code>@posts</code> allowing the erb template to access the data without directly communicating with the Model / Database layer. The template can then iterate through the <code>post</code> objects and display the data contained within those objects (which are essentially table rows when speaking on the database layer). So far, so good.</p>
 
-<p>Every controller action maps to a respective view template (unless of course we redirect instead of render), so as an application grows in complexity, we can expect for code to get cluttered and we often find ourselves repeating the same code in multiple files. It turns out, we can create special templates called <em>partial</em>, in which we can embed the repetitive code. We can then &lsquo;pull in&rsquo; the partial from multiple files whenever we seek to access its content. A code is worth a million words, so here is an example:</p>
+<p>Every controller action maps to a respective view template (unless of course we redirect instead of render), so as an application grows in complexity, we can expect for code to get cluttered and we often find ourselves repeating the same code in multiple files. It turns out, we can create special templates called <em>partial</em>, in which we can embed the repetitive code. We can then <em>pull in</em> the partial from multiple files whenever we seek to access its content. A code is worth a million words, so here is an example:</p>
 
 <figure class='code'><figcaption><span>Pulling In a Partial Inside app/views/posts/index.html.erb  </span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -153,11 +153,11 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>All partial files are named with a preceding underscore (again by convention), but strangely enough whenever we render the partial, it is called without the underscore, as shown by the top code. We are also passing a local variable <code>title</code> into the partial, which allows us render code across multiple files that is similar in structure, but varies in content. Specifically, we can call this partial from any view file (such as show.html.erb, edit.html.erb, etc), and by passing in different values for <code>title</code> we can render dynamic content while maintaining the structure of having the single <code>h4</code> and <code>p</code> tags.</p>
+<p>All partial files are named with a preceding underscore (again by convention), but strangely enough whenever we render the partial, it is called without the underscore, as shown by the top code. We are also passing a local variable <code>title</code> into the partial, which allows us to render code across multiple files that is similar in structure, but varies in content. Specifically, we can call this partial from any view file (such as show.html.erb or edit.html.erb), and by passing in different values for <code>title</code> we can render dynamic content while maintaining the structure of having the single <code>h4</code> and <code>p</code> tags.</p>
+
+<p>****To Be Continued</p>
 
 <p>Since this post is getting WAAAY longer than I anticipated, I will continue this discussion on partials and how Rails convention can get a little convoluted on the next post.</p>
-
-<p>I&rsquo;ve been digressing quite a bit, but quite frankly, I&rsquo;m starting to enjoy this process of articulating technical concepts because it helps me get accustomed to the web development / programming jargon, which is so So SO important in communicating with fellow developers. Anyways, in the next post I will discuss partials in greater detail and how Rails convention can get a little convoluted.</p>
 </div>
 
 
@@ -204,7 +204,7 @@
         <a class="basic-alignment left" href="/blog/2014/05/08/my-first-post/" title="Previous Post: My First Blog Post">&laquo; My First Blog Post</a>
       
       
-        <a class="basic-alignment right" href="/blog/2014/05/09/part-ii/" title="Next Post: Part II - Rails Convention">Part II - Rails Convention &raquo;</a>
+        <a class="basic-alignment right" href="/blog/2014/05/09/part-ii/" title="Next Post: Part II - Rails Conventions">Part II - Rails Conventions &raquo;</a>
       
     </p>
   </footer>
@@ -225,7 +225,7 @@
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2014/05/09/part-ii/">Part II - Rails Convention</a>
+        <a href="/blog/2014/05/09/part-ii/">Part II - Rails Conventions</a>
       </li>
     
       <li class="post">

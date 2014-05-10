@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Rails Convention | Tsubasa Furukawa | Web Developer in Training]]></title>
   <link href="http://tsufurukawa-blog.herokuapp.com/blog/categories/rails-convention/atom.xml" rel="self"/>
   <link href="http://tsufurukawa-blog.herokuapp.com/"/>
-  <updated>2014-05-09T18:27:55-07:00</updated>
+  <updated>2014-05-09T20:38:05-07:00</updated>
   <id>http://tsufurukawa-blog.herokuapp.com/</id>
   <author>
     <name><![CDATA[Tsubasa Furukawa]]></name>
@@ -14,15 +14,15 @@
 
   
   <entry>
-    <title type="html"><![CDATA[Part II - Rails Convention]]></title>
+    <title type="html"><![CDATA[Part II - Rails Conventions]]></title>
     <link href="http://tsufurukawa-blog.herokuapp.com/blog/2014/05/09/part-ii/"/>
     <updated>2014-05-09T11:38:40-07:00</updated>
     <id>http://tsufurukawa-blog.herokuapp.com/blog/2014/05/09/part-ii</id>
-    <content type="html"><![CDATA[<p>In the previous post we saw that we can pass in a file name such as <code>shared/content_file</code> into a partial, which will then render the <code>_content_file.html.erb</code> file allowing us to create content that is shared amongst many pages in our application. We can also pass in a local variable such as <code>title</code> containing dynamic data that can change depending on what value we assign to the variable.</p>
+    <content type="html"><![CDATA[<p>In the previous post we saw that we can pass in a file name such as <code>shared/content_file</code> into a partial, which will then render the <code>_content_file.html.erb</code> file allowing us to create content that is shared among many pages in our application. We can also pass in a local variable such as <code>title</code>, containing dynamic data that changes depending on what value we assign to the variable.</p>
 
 <h4>Rendering Model Instances</h4>
 
-<p>Things can get quite interesting when we pass in instance model objects to the partial. An example is taken from <a href="http://guides.rubyonrails.org/layouts_and_rendering.html">Rails Guide</a>. Here <code>@customer</code> is an instance of the <code>Customer</code> model, which could&rsquo;ve been defined somewhere in the <code>CustomersController</code> like this <code>@customer = Customer.first</code>.</p>
+<p>Things can get quite interesting when we pass in model instances to the partial. An example is taken from <a href="http://guides.rubyonrails.org/layouts_and_rendering.html">Rails Guide</a>. Here <code>@customer</code> is an instance of the <code>Customer</code> model, which could&rsquo;ve been defined somewhere in the <code>CustomersController</code> like this <code>@customer = Customer.first</code>.</p>
 
 <p><code>erb Ex 1: Rendering Instance Objects (Simplified Way)
 &lt;%= render @customer %&gt;
@@ -34,11 +34,11 @@
 &lt;%= render 'customers/customer', customer: @customer %&gt;  
 </code></p>
 
-<p>By convention, when we pass in a model instance object, Rails expects the partial to be named after the model (preceded with an underscore) placed inside a directory with a lowercase plural form of the model name (i.e. <code>customers</code>) &ndash; and this is precisely what we see in <em>Ex 2</em>. For the second argument, Rails created a local variable (named after the object model), and set it to the <code>@customer</code> instance variable. In a nutshell, Ex 1 is what we call <em>syntactic sugar</em> that saves us a few extra keystrokes.</p>
+<p>By convention, when we pass in a model instance to a partial, Rails expects the partial to be named after the model (preceded with an underscore) placed inside a directory with a lowercase plural form of the model name (i.e. <code>customers</code>) &ndash; and this is precisely what we see in <em>Ex 2</em>. For the second argument, Rails created a local variable (named after the object model), and set it to the <code>@customer</code> instance variable. In a nutshell, Ex 1 is what we call <em>syntactic sugar</em> that saves us a few extra keystrokes.</p>
 
 <h4>Rendering Collections (Array of Objects)</h4>
 
-<p>Finally, let&rsquo;s say we have an array of objects (aka &lsquo;collection&rsquo;) that we would like to pass in to a partial, so that we can render content dynamically based on data encapsulated within the individual objects. Here is how we might initially approach this problem.</p>
+<p>Finally, let&rsquo;s say we have an array of objects (aka <em>collection</em>) that we would like to pass in to a partial, so that we can render content dynamically based on data encapsulated within the individual objects. Here is how we might initially approach this problem.</p>
 
 <p><code>erb Ex 3: Rendering Collections (Long Way)
 &lt;% categories = Category.all %&gt;
@@ -52,7 +52,7 @@
 <p><p>This is the category name that changes depending on the objects that are passed in: &lt;%= category.name %></p>
 ```</p>
 
-<p>By now, Ex 3 should be fairly comprehensible. <code>categories</code> is a collection of <code>category</code> instances. We iterate through the collection, and for every object, we render the partial while passing in the individual <code>category</code> instances that are assigned to a <code>category</code> local variable. Then inside the partial template, we can use the <code>category</code> local variable and extract attributes such as <code>name</code> from the object that the local variable is referencing.</p>
+<p>By now, Ex 3 should be fairly comprehensible. <code>categories</code> is a collection of <code>category</code> instances. We iterate through the collection, and for every iteration, we render the partial while passing in the <code>category</code> local variable. Then inside the partial template, we can use the <code>category</code> local variable and extract attributes such as <code>name</code> from the object that the local variable is referencing.</p>
 
 <p>Just like everything else in Rails, it turns out there is a shorthand syntax for this.</p>
 
@@ -65,7 +65,7 @@
 
 <h4>Aside</h4>
 
-<p>Here is another quote I like that I once heard from Jeff Van Gundy, color commentator for ESPN. It turns out it was originally quoted by Ralph Waldo Emerson.</p>
+<p>Here is another quote I like that I once heard from Jeff Van Gundy, color commentator for ESPN. It turns out thoough, it was originally quoted by Ralph Waldo Emerson.</p>
 
 <blockquote><p>“Your actions speak so loudly, I cannot hear what you are saying.”
 <cite><sub> &ndash; Ralph Waldo Emerson</sub></cite></p></blockquote>
@@ -79,9 +79,9 @@
     <id>http://tsufurukawa-blog.herokuapp.com/blog/2014/05/08/rails-resources</id>
     <content type="html"><![CDATA[<h4>Some Basic Rails Conventions</h4>
 
-<p>Now, let&rsquo;s talk Rails. Rails is&hellip;interesting, to say the least. It&rsquo;s only been a week since I&rsquo;ve been exposed to the core ideology behind Rails, so I am far from knowing the ins and outs of the language. Rails is centered around the paradigm of <em>Convention Over Configuration</em>, which in layman&rsquo;s terms &ndash; follow the convention and you&rsquo;ll be grateful, and you&rsquo;re screwed if you don&rsquo;t. I think these conventions are what makes everything in Rails seem so magical, while simultaneously confusing. Until you wrap your head around the fact that a lot goes behind the scenes and some things you just have to take for granted, learning Rails can be quite a challenge.</p>
+<p>Now, let&rsquo;s talk Rails. Rails is&hellip;interesting, to say the least. It&rsquo;s only been a week since I&rsquo;ve been exposed to the core ideology behind Rails, so I am far from knowing the ins and outs of the language. Rails is centered around the paradigm of <em>Convention Over Configuration</em>, which in layman&rsquo;s terms &ndash; follow the convention and you&rsquo;ll be grateful, and you&rsquo;re screwed if you don&rsquo;t. I think these conventions are what makes everything in Rails seem so magical, while simultaneously confusing. Until you wrap your head around the fact that a lot goes behind the scenes and some things you just have to take for granted, learning Rails could be quite a challenge.</p>
 
-<p>Here, I present some crazy conventions that I encountered and had difficult time digesting; thus, I deemed important to take note.</p>
+<p>Here, I present some crazy conventions that I encountered and initially had difficult time digesting; thus, I deemed important to take note.</p>
 
 <p>In Rails (or any MVC framework for that matter), the <em>View</em> contains the content that will be rendered and returned to the browser as part of the HTTP response. An example erb template and the controller that renders the template, are shown below:</p>
 
@@ -103,9 +103,9 @@ class PostsController &lt; ApplicationController
 end
 ```</p>
 
-<p>Here the <code>PostsController</code> is extracting all <code>Post</code> instances stored in the database called <code>posts</code> (named in such way by convention) and storing it in an instance variable called <code>@posts</code> allowing the erb template to access the data without directly communicating with the Model / Database layer. The template can then iterate through the <code>Post</code> objects and display the data contained within those objects (which are essentially table rows when speaking on the database layer). So far, so good.</p>
+<p>Here the <code>PostsController</code> is extracting all <code>Post</code> instances stored in the database called <code>posts</code> (named in such way by convention) and storing it in an instance variable called <code>@posts</code> allowing the erb template to access the data without directly communicating with the Model / Database layer. The template can then iterate through the <code>post</code> objects and display the data contained within those objects (which are essentially table rows when speaking on the database layer). So far, so good.</p>
 
-<p>Every controller action maps to a respective view template (unless of course we redirect instead of render), so as an application grows in complexity, we can expect for code to get cluttered and we often find ourselves repeating the same code in multiple files. It turns out, we can create special templates called <em>partial</em>, in which we can embed the repetitive code. We can then &lsquo;pull in&rsquo; the partial from multiple files whenever we seek to access its content. A code is worth a million words, so here is an example:</p>
+<p>Every controller action maps to a respective view template (unless of course we redirect instead of render), so as an application grows in complexity, we can expect for code to get cluttered and we often find ourselves repeating the same code in multiple files. It turns out, we can create special templates called <em>partial</em>, in which we can embed the repetitive code. We can then <em>pull in</em> the partial from multiple files whenever we seek to access its content. A code is worth a million words, so here is an example:</p>
 
 <p>``` erb Pulling In a Partial Inside app/views/posts/index.html.erb</p>
 
@@ -133,11 +133,11 @@ end
 <p><p>&lt;%= title %></p>
 ```</p>
 
-<p>All partial files are named with a preceding underscore (again by convention), but strangely enough whenever we render the partial, it is called without the underscore, as shown by the top code. We are also passing a local variable <code>title</code> into the partial, which allows us render code across multiple files that is similar in structure, but varies in content. Specifically, we can call this partial from any view file (such as show.html.erb, edit.html.erb, etc), and by passing in different values for <code>title</code> we can render dynamic content while maintaining the structure of having the single <code>h4</code> and <code>p</code> tags.</p>
+<p>All partial files are named with a preceding underscore (again by convention), but strangely enough whenever we render the partial, it is called without the underscore, as shown by the top code. We are also passing a local variable <code>title</code> into the partial, which allows us to render code across multiple files that is similar in structure, but varies in content. Specifically, we can call this partial from any view file (such as show.html.erb or edit.html.erb), and by passing in different values for <code>title</code> we can render dynamic content while maintaining the structure of having the single <code>h4</code> and <code>p</code> tags.</p>
+
+<p>****To Be Continued</p>
 
 <p>Since this post is getting WAAAY longer than I anticipated, I will continue this discussion on partials and how Rails convention can get a little convoluted on the next post.</p>
-
-<p>I&rsquo;ve been digressing quite a bit, but quite frankly, I&rsquo;m starting to enjoy this process of articulating technical concepts because it helps me get accustomed to the web development / programming jargon, which is so So SO important in communicating with fellow developers. Anyways, in the next post I will discuss partials in greater detail and how Rails convention can get a little convoluted.</p>
 ]]></content>
   </entry>
   
