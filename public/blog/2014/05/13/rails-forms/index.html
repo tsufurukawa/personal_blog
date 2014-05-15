@@ -1,0 +1,344 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Part I: Rails Forms - Tsubasa Furukawa | Web Developer in Training</title>
+  <meta name="author" content="Tsubasa Furukawa">
+
+  
+  <meta name="description" content="In general, there are 3 ways to create and handle forms in Rails: pure html, form helpers, and model-backed form helpers. Pure HTML Way The pure html &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://tsufurukawa-blog.herokuapp.com/blog/2014/05/13/rails-forms">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Tsubasa Furukawa | Web Developer in Training" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Tsubasa Furukawa | Web Developer in Training</a></h1>
+  
+    <h2>Learning Ruby on Rails</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:tsufurukawa-blog.herokuapp.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Part I: Rails Forms</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-13T19:55:35-07:00" pubdate data-updated="true">May 13<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>In general, there are 3 ways to create and handle forms in Rails: pure html, form helpers, and model-backed form helpers.</p>
+
+<h4>Pure HTML Way</h4>
+
+<p>The pure html way is just that &ndash; pure HTML. So it really has nothing to do with Rails. This approach is shown in the code below:</p>
+
+<figure class='code'><figcaption><span>Ex 1: Form Using Pure HTML</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;form</span> <span class="na">action=</span><span class="s">&#39;/posts&#39;</span> <span class="na">method=</span><span class="s">&#39;POST&#39;</span><span class="nt">&gt;</span>
+</span><span class='line'>  Title: <span class="nt">&lt;input</span> <span class="na">typ=</span><span class="s">&#39;text&#39;</span> <span class="na">name=</span><span class="s">&#39;my_title&#39;</span><span class="nt">&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">&#39;submit&#39;</span><span class="nt">&gt;</span>
+</span><span class='line'><span class="nt">&lt;/form&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The <code>action</code> and <code>method</code> attributes specify the URL and HTTP verb used for the form submission. In other words, the form will be routed to <code>posts#create</code>, which is the action in which the form submission data is parsed and processed to create a new <code>post</code> object. It is important to specify the <code>name</code> attribute inside <code>input</code> because it acts as the key that maps to the value entered in the text field (eg: <code>"my_title" =&gt; "some title"</code>). We can then recover that value by using the params hash like so: <code>params[:my_title]</code>.</p>
+
+<p>Submitting this form will actually result in an <code>InvalidAuthenticityToken Error</code> because of a security issue with cross-site scripting. Rails requires us to verify that the form was submitted from a page we generated, which is accomplished by the presence of an <code>authenticity_token</code>. Since the pure html way does not have an authenticity token built in, we should almost always avoid using this method to handle form submission.</p>
+
+<h4>Rails Non-Model Backed Form Helpers</h4>
+
+<p>The second method is using Non-Model Backed Forrm Helpers. The syntax is shown below:</p>
+
+<figure class='code'><figcaption><span>Ex 2: Form Using Non-Model Backed Form Helpers</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='erb'><span class='line'><span class="cp">&lt;%=</span> <span class="n">form_tag</span> <span class="s1">&#39;/posts&#39;</span> <span class="k">do</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">  </span><span class="cp">&lt;%=</span> <span class="n">label_tag</span> <span class="ss">:title</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">  </span><span class="cp">&lt;%=</span> <span class="n">text_field_tag</span> <span class="ss">:title</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">  &lt;br/&gt;</span>
+</span><span class='line'><span class="x">  </span><span class="cp">&lt;%=</span> <span class="n">submit_tag</span> <span class="s2">&quot;Create Post&quot;</span><span class="p">,</span> <span class="ss">class</span><span class="p">:</span> <span class="s1">&#39;btn btn-primary&#39;</span><span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span><span class="x">  </span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The above code will generate an html like this:</p>
+
+<figure class='code'><figcaption><span>Ex 3: HTML Generated Using Rails Form Helperes</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">&quot;margin:0;padding:0;display:inline&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;input</span> <span class="na">name=</span><span class="s">&quot;utf8&quot;</span> <span class="na">type=</span><span class="s">&quot;hidden&quot;</span> <span class="na">value=</span><span class="s">&quot;✓&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;input</span> <span class="na">name=</span><span class="s">&quot;authenticity_token&quot;</span> <span class="na">type=</span><span class="s">&quot;hidden&quot;</span> <span class="na">value=</span><span class="s">&quot;d/fqhgShsPjPL+Mxslr6fwj4rCbLVMkndsJ1M3DJPiY=&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'><span class="nt">&lt;/div&gt;</span>
+</span><span class='line'><span class="nt">&lt;label</span> <span class="na">for=</span><span class="s">&quot;title&quot;</span><span class="nt">&gt;</span>Title<span class="nt">&lt;/label&gt;</span>
+</span><span class='line'><span class="nt">&lt;input</span> <span class="na">id=</span><span class="s">&quot;title&quot;</span> <span class="na">name=</span><span class="s">&quot;title&quot;</span> <span class="na">type=</span><span class="s">&quot;text&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'><span class="nt">&lt;input</span> <span class="na">class=</span><span class="s">&quot;btn btn-primary&quot;</span> <span class="na">name=</span><span class="s">&quot;commit&quot;</span> <span class="na">type=</span><span class="s">&quot;submit&quot;</span> <span class="na">value=</span><span class="s">&quot;Create Post&quot;</span><span class="nt">&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>As before, we have a <code>name</code> attribute that maps to the value submitted in the text field. But notice we also have a <code>div</code> nestsed inside the <code>form</code> element. Inside this <code>div</code>, we have a hidden <code>authenticity_token</code> that allows us to get around the Cross-Site Requeset Forgery (CSRF) protection that comes with Rails.</p>
+
+<h4>Rails Model-Backed Form Helpers</h4>
+
+<p>Lastly, we have the model-backed form helpers. These are used when performing &ldquo;CRUD&rdquo; actions on a resource (i.e. ActiveRecord model); whereas, non-model backed forms are used everywhere else where ActiveRecord models are not involved. The syntax is shown below:</p>
+
+<figure class='code'><figcaption><span>Ex 4: Form Using Model-Backed Form Helpers</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='erb'><span class='line'><span class="cp">&lt;%=</span> <span class="n">form_for</span> <span class="vi">@post</span> <span class="k">do</span> <span class="o">|</span><span class="n">f</span><span class="o">|</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">  </span><span class="cp">&lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">label</span> <span class="ss">:title</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">  </span><span class="cp">&lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">text_field</span> <span class="ss">:title</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">  </span><span class="cp">&lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">label</span> <span class="ss">:description</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">  </span><span class="cp">&lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">text_area</span> <span class="ss">:description</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">  </span><span class="cp">&lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">submit</span> <span class="s2">&quot;Create Post&quot;</span><span class="p">,</span> <span class="ss">class</span><span class="p">:</span> <span class="s2">&quot;btn btn-primary&quot;</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>There are a couple of interesting (and confusing) conventions at work that makes model-backed forms so useful. First, the <code>form_for</code> takes in a model object instead of a url &ndash; and this is where Rails magic kicks in. If the object is a new object, Rails will send the form to the <code>posts#create</code> action; whereas, if the object is an existing one, Rails will send the form to the <code>posts#update</code> action. In other words, Rails will automatically generate the correct URL and HTTP verb depending on the model object that is passed in to the form. This may sound trivial at first, but this implies that we can use the same form for two different controller actions &ndash; one for <code>new</code> where we pass in a new <code>post</code> object, and one for <code>edit</code> where we pass in an existing <code>post</code> object.</p>
+
+<p>The second interesting feature is that the input element has a name of <code>post[title]</code>, meaning the parameters are nested inside a top-level key of <code>post</code>, as shown here: <code>"post" =&gt; {"title": "some title", "description": "some description"}</code>. We can then do something like this, <code>Post.new(params[:post])</code> to mass assign all attributes values to create a new post.</p>
+
+<p>Lastly, as the name &ldquo;model-backed&rdquo; implies, we can ONLY refer to <em>Attributes</em> or <em>Virtual Attributes</em> available to us by the ActiveRecord model. Therefore, we cannot use arbitrary keys that do not reside in our database. For example, <code>&lt;%= f.text_field :whatever %&gt;</code> will not work because <code>whatever</code> is not a getter/setter that is made available to us by the <code>Post</code> model. This is also why model-backed helpers are used when acting on a resource, and non-model backed helpers are used everywhere else.</p>
+
+<h4>Summary</h4>
+
+<p>To summarize the above in one sentence: never use pure HTML forms, use model-backed forms when working with an ActiveRecord model, and use non model-backed forms for all other occassions. In the next post, we will discuss how to handle the actual submission of the form using strong parameters and validations.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Tsubasa Furukawa</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-13T19:55:35-07:00" pubdate data-updated="true">May 13<span>th</span>, 2014</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/forms/'>Forms</a>, <a class='category' href='/blog/categories/rails/'>Rails</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/05/09/part-ii/" title="Previous Post: Part II - Rails Conventions">&laquo; Part II - Rails Conventions</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2014/05/13/part-ii-rails-forms/" title="Next Post: Part II: Rails Forms">Part II: Rails Forms &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/05/13/part-ii-rails-forms/">Part II: Rails Forms</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/05/13/rails-forms/">Part I: Rails Forms</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/05/09/part-ii/">Part II - Rails Conventions</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/05/08/rails-resources/">Part I: Rails Conventions</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/05/08/my-first-post/">My First Blog Post</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/tsufurukawa">@tsufurukawa</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'tsufurukawa',
+            count: 5,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Tsubasa Furukawa -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+      <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'tsufurukawa-blog'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+    
+
+
+
+
+
+
+
+
+
+</body>
+</html>

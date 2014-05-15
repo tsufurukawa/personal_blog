@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Rails | Tsubasa Furukawa | Web Developer in Training]]></title>
   <link href="http://tsufurukawa-blog.herokuapp.com/blog/categories/rails/atom.xml" rel="self"/>
   <link href="http://tsufurukawa-blog.herokuapp.com/"/>
-  <updated>2014-05-09T20:46:12-07:00</updated>
+  <updated>2014-05-14T18:18:45-07:00</updated>
   <id>http://tsufurukawa-blog.herokuapp.com/</id>
   <author>
     <name><![CDATA[Tsubasa Furukawa]]></name>
@@ -12,6 +12,185 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Part II: Rails Forms]]></title>
+    <link href="http://tsufurukawa-blog.herokuapp.com/blog/2014/05/13/part-ii-rails-forms/"/>
+    <updated>2014-05-13T22:41:29-07:00</updated>
+    <id>http://tsufurukawa-blog.herokuapp.com/blog/2014/05/13/part-ii-rails-forms</id>
+    <content type="html"><![CDATA[<p>In the last post, we discussed how to generate forms, how the parameters are stored inside a <code>params</code> hash, and where the form is submitted to. In this post, we talk about how to handle the form submission using validations and strong parameters.</p>
+
+<h4>Strong Parameters</h4>
+
+<p>Strong parameters is a security feature that protects attributes from end-user mass assignment. Quoting the <a href="http://api.rubyonrails.org/classes/ActionController/StrongParameters.html">Rails API</a>,</p>
+
+<blockquote><p>&ldquo;With strong parameters, Action Controller parameters are forbidden to be used in Active Model mass assignments until they have been whitelisted.</p></blockquote>
+
+<p>This means that we manually specify which attributes are allowed for mass updating. To whitelist an entire hash of parameters, the <code>permit!</code> method can be used: <code>params.require(:post).permit!</code>. The <code>require(:post)</code> suggests that the attributes are nested inside a <code>post</code> top-level key (which as we recall, is what we get using model-backed forms).</p>
+
+<h4>Validations</h4>
+
+<p>Next, validations are used to ensure that only valid data is saved into our database. For example, if every post must have <code>title</code>, <code>url</code>, and <code>description</code> attributes for the post to be valid, we must explicitly specify the validation on the <em>Model Layer</em>. Such validations might look like this:</p>
+
+<p><code>ruby Ex 1: Post Model Validation
+class Post &lt; ActiveRecord::Base
+  validates :title, presence: true, length: { minimum: 5 }
+  validates :url, presence: true, uniqueness: true
+  validates :description, presence: true
+end
+</code></p>
+
+<p>An important aspect of validation is that the errors are not triggered until the changes hit the database. This means that when creating a new <code>post</code> object, the validation errors will kick in after a <code>.create</code> <code>.update</code> or <code>.save</code> methods are called on <code>Post</code> (but not <code>.new</code>). If validations are successful, the assignment will return true, and otherwise, it will return false.</p>
+
+<h4>Validation Pattern</h4>
+
+<p>When creating the <code>create</code> / <code>update</code> actions from a model-backed form, we use a generalized pattern to handle the validations.</p>
+
+<p>```ruby Ex 2: Validation Pattern (app/controllers/posts_controller.rb)
+def create
+  @post = Post.new(post_params)</p>
+
+<p>  if @post.save</p>
+
+<pre><code>flash[:notice] = "You successfully created a new post."
+redirect_to posts_path
+</code></pre>
+
+<p>  else</p>
+
+<pre><code>render :new
+</code></pre>
+
+<p>  end
+end</p>
+
+<p>def update
+  @post = Post.find(params[:id])</p>
+
+<p>  if @post.update(post_params)</p>
+
+<pre><code>flash[:notice] = "You successfully updated an existing post."
+redirect_to posts_path
+</code></pre>
+
+<p>  else</p>
+
+<pre><code>render :edit
+</code></pre>
+
+<p>  end
+end</p>
+
+<p>private</p>
+
+<p>def post_params
+  params.require(:post).permit(:title, :url, :description)
+end
+```</p>
+
+<p>There are a variety of interesting things going on here. First, we defined a private method called <code>post_params</code> which sets up the strong parameters as we discussed earlier. Inside the <code>create</code> and <code>update</code> actions, we call <code>post_params</code> to mass assign parameters to the <code>@post</code> object. Second, if the validation is successful, we <code>redirect_to</code> to <code>posts_path</code>. We can actually redirect to wherever we desire, but in this case, we are redirecting to <code>posts#index</code> action where we display all posts. Lastly and perhaps most importantly, if the validation is unsuccessful, we <code>render</code> the form template. This is VERY important!! We CANNOT redirect because if validation fails, we want to display the error messages in the <code>view</code>. This is only possible when we render because the error message is stored inside an instance variable <code>@post.errors</code>. If we redirect, we lose access to that instance variable because we&rsquo;re issuing another HTTP request (HTTP is a <em>stateless</em> protocol).</p>
+
+<p>The <code>.errors</code> method will return a <code>@messages</code> hash that contains all validation error messages. We can extract these messages into an array-like structure using the <code>.errors.full_messages</code> method. We can then iterate through these messages and display them inside our view template:</p>
+
+<p>```erb Ex 3: Displaying Validation Errors
+&lt;%= if @post.errors.any? %>
+  <h5>There were some errors:</h5>
+  <ul></p>
+
+<pre><code>&lt;% @post.errors.full_messages.each do |msg| %&gt;
+  &lt;li&gt;&lt;%= msg %&gt;&lt;/li&gt;
+&lt;% end %&gt;
+</code></pre>
+
+<p>  </ul>
+&lt;% end %>
+```</p>
+
+<p>Notice here that we are using the <code>@post</code> object. This is again why it is important that we render (instead of redirect) when validation fails, because we need to access the <code>@post</code> instance variable and its associated <code>.errors</code>.</p>
+
+<h4>Summary</h4>
+
+<p>Strong parameters and validations work hand-in-hand within the generalized validation pattern. Rails form is one of the fundamental concepts of the framework and should not be taken for granted. As a Rails developer, it&rsquo;s VERY important to be able to construct and handle forms with ease. You should be able to do it blindfolded, with your hands tied behind your back, and in your sleep. It&rsquo;s THAT important!!!</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Part I: Rails Forms]]></title>
+    <link href="http://tsufurukawa-blog.herokuapp.com/blog/2014/05/13/rails-forms/"/>
+    <updated>2014-05-13T19:55:35-07:00</updated>
+    <id>http://tsufurukawa-blog.herokuapp.com/blog/2014/05/13/rails-forms</id>
+    <content type="html"><![CDATA[<p>In general, there are 3 ways to create and handle forms in Rails: pure html, form helpers, and model-backed form helpers.</p>
+
+<h4>Pure HTML Way</h4>
+
+<p>The pure html way is just that &ndash; pure HTML. So it really has nothing to do with Rails. This approach is shown in the code below:</p>
+
+<p><code>html Ex 1: Form Using Pure HTML
+&lt;form action='/posts' method='POST'&gt;
+  Title: &lt;input typ='text' name='my_title'&gt;
+  &lt;input type='submit'&gt;
+&lt;/form&gt;
+</code></p>
+
+<p>The <code>action</code> and <code>method</code> attributes specify the URL and HTTP verb used for the form submission. In other words, the form will be routed to <code>posts#create</code>, which is the action in which the form submission data is parsed and processed to create a new <code>post</code> object. It is important to specify the <code>name</code> attribute inside <code>input</code> because it acts as the key that maps to the value entered in the text field (eg: <code>"my_title" =&gt; "some title"</code>). We can then recover that value by using the params hash like so: <code>params[:my_title]</code>.</p>
+
+<p>Submitting this form will actually result in an <code>InvalidAuthenticityToken Error</code> because of a security issue with cross-site scripting. Rails requires us to verify that the form was submitted from a page we generated, which is accomplished by the presence of an <code>authenticity_token</code>. Since the pure html way does not have an authenticity token built in, we should almost always avoid using this method to handle form submission.</p>
+
+<h4>Rails Non-Model Backed Form Helpers</h4>
+
+<p>The second method is using Non-Model Backed Forrm Helpers. The syntax is shown below:</p>
+
+<p><code>erb Ex 2: Form Using Non-Model Backed Form Helpers
+&lt;%= form_tag '/posts' do %&gt;
+  &lt;%= label_tag :title %&gt;
+  &lt;%= text_field_tag :title %&gt;
+  &lt;br/&gt;
+  &lt;%= submit_tag "Create Post", class: 'btn btn-primary'%&gt;
+&lt;% end %&gt;  
+</code></p>
+
+<p>The above code will generate an html like this:</p>
+
+<p>```html Ex 3: HTML Generated Using Rails Form Helperes</p>
+
+<div style="margin:0;padding:0;display:inline">
+  <input name="utf8" type="hidden" value="✓">
+  <input name="authenticity_token" type="hidden" value="d/fqhgShsPjPL+Mxslr6fwj4rCbLVMkndsJ1M3DJPiY=">
+</div>
+
+
+<p><label for="title">Title</label>
+<input id="title" name="title" type="text">
+<input class="btn btn-primary" name="commit" type="submit" value="Create Post">
+```</p>
+
+<p>As before, we have a <code>name</code> attribute that maps to the value submitted in the text field. But notice we also have a <code>div</code> nestsed inside the <code>form</code> element. Inside this <code>div</code>, we have a hidden <code>authenticity_token</code> that allows us to get around the Cross-Site Requeset Forgery (CSRF) protection that comes with Rails.</p>
+
+<h4>Rails Model-Backed Form Helpers</h4>
+
+<p>Lastly, we have the model-backed form helpers. These are used when performing &ldquo;CRUD&rdquo; actions on a resource (i.e. ActiveRecord model); whereas, non-model backed forms are used everywhere else where ActiveRecord models are not involved. The syntax is shown below:</p>
+
+<p><code>erb Ex 4: Form Using Model-Backed Form Helpers
+&lt;%= form_for @post do |f| %&gt;
+  &lt;%= f.label :title %&gt;
+  &lt;%= f.text_field :title %&gt;
+  &lt;%= f.label :description %&gt;
+  &lt;%= f.text_area :description %&gt;
+  &lt;%= f.submit "Create Post", class: "btn btn-primary" %&gt;
+&lt;% end %&gt;
+</code></p>
+
+<p>There are a couple of interesting (and confusing) conventions at work that makes model-backed forms so useful. First, the <code>form_for</code> takes in a model object instead of a url &ndash; and this is where Rails magic kicks in. If the object is a new object, Rails will send the form to the <code>posts#create</code> action; whereas, if the object is an existing one, Rails will send the form to the <code>posts#update</code> action. In other words, Rails will automatically generate the correct URL and HTTP verb depending on the model object that is passed in to the form. This may sound trivial at first, but this implies that we can use the same form for two different controller actions &ndash; one for <code>new</code> where we pass in a new <code>post</code> object, and one for <code>edit</code> where we pass in an existing <code>post</code> object.</p>
+
+<p>The second interesting feature is that the input element has a name of <code>post[title]</code>, meaning the parameters are nested inside a top-level key of <code>post</code>, as shown here: <code>"post" =&gt; {"title": "some title", "description": "some description"}</code>. We can then do something like this, <code>Post.new(params[:post])</code> to mass assign all attributes values to create a new post.</p>
+
+<p>Lastly, as the name &ldquo;model-backed&rdquo; implies, we can ONLY refer to <em>Attributes</em> or <em>Virtual Attributes</em> available to us by the ActiveRecord model. Therefore, we cannot use arbitrary keys that do not reside in our database. For example, <code>&lt;%= f.text_field :whatever %&gt;</code> will not work because <code>whatever</code> is not a getter/setter that is made available to us by the <code>Post</code> model. This is also why model-backed helpers are used when acting on a resource, and non-model backed helpers are used everywhere else.</p>
+
+<h4>Summary</h4>
+
+<p>To summarize the above in one sentence: never use pure HTML forms, use model-backed forms when working with an ActiveRecord model, and use non model-backed forms for all other occassions. In the next post, we will discuss how to handle the actual submission of the form using strong parameters and validations.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Part II - Rails Conventions]]></title>
@@ -42,7 +221,7 @@
 
 <p><code>erb Ex 3: Rendering Collections (Long Way)
 &lt;% categories = Category.all %&gt;
-&lt;% categories do |category| %&gt;
+&lt;% categories.each do |category| %&gt;
   &lt;%= render 'categories/category', category: category %&gt;
 &lt;% end %&gt;
 </code></p>

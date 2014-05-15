@@ -30,7 +30,7 @@ Finally, let's say we have an array of objects (aka *collection*) that we would 
 
 ```erb Ex 3: Rendering Collections (Long Way)
 <% categories = Category.all %>
-<% categories do |category| %>
+<% categories.each do |category| %>
   <%= render 'categories/category', category: category %>
 <% end %>
 ``` 

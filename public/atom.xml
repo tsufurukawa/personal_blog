@@ -4,7 +4,7 @@
   <title><![CDATA[Tsubasa Furukawa | Web Developer in Training]]></title>
   <link href="http://tsufurukawa-blog.herokuapp.com/atom.xml" rel="self"/>
   <link href="http://tsufurukawa-blog.herokuapp.com/"/>
-  <updated>2014-05-09T20:46:12-07:00</updated>
+  <updated>2014-05-14T18:18:45-07:00</updated>
   <id>http://tsufurukawa-blog.herokuapp.com/</id>
   <author>
     <name><![CDATA[Tsubasa Furukawa]]></name>
@@ -12,6 +12,233 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Part II: Rails Forms]]></title>
+    <link href="http://tsufurukawa-blog.herokuapp.com/blog/2014/05/13/part-ii-rails-forms/"/>
+    <updated>2014-05-13T22:41:29-07:00</updated>
+    <id>http://tsufurukawa-blog.herokuapp.com/blog/2014/05/13/part-ii-rails-forms</id>
+    <content type="html"><![CDATA[<p>In the last post, we discussed how to generate forms, how the parameters are stored inside a <code>params</code> hash, and where the form is submitted to. In this post, we talk about how to handle the form submission using validations and strong parameters.</p>
+
+<h4>Strong Parameters</h4>
+
+<p>Strong parameters is a security feature that protects attributes from end-user mass assignment. Quoting the <a href="http://api.rubyonrails.org/classes/ActionController/StrongParameters.html">Rails API</a>,</p>
+
+<blockquote><p>&ldquo;With strong parameters, Action Controller parameters are forbidden to be used in Active Model mass assignments until they have been whitelisted.</p></blockquote>
+
+<p>This means that we manually specify which attributes are allowed for mass updating. To whitelist an entire hash of parameters, the <code>permit!</code> method can be used: <code>params.require(:post).permit!</code>. The <code>require(:post)</code> suggests that the attributes are nested inside a <code>post</code> top-level key (which as we recall, is what we get using model-backed forms).</p>
+
+<h4>Validations</h4>
+
+<p>Next, validations are used to ensure that only valid data is saved into our database. For example, if every post must have <code>title</code>, <code>url</code>, and <code>description</code> attributes for the post to be valid, we must explicitly specify the validation on the <em>Model Layer</em>. Such validations might look like this:</p>
+
+<figure class='code'><figcaption><span>Ex 1: Post Model Validation</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Post</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="n">validates</span> <span class="ss">:title</span><span class="p">,</span> <span class="ss">presence</span><span class="p">:</span> <span class="kp">true</span><span class="p">,</span> <span class="ss">length</span><span class="p">:</span> <span class="p">{</span> <span class="ss">minimum</span><span class="p">:</span> <span class="mi">5</span> <span class="p">}</span>
+</span><span class='line'>  <span class="n">validates</span> <span class="ss">:url</span><span class="p">,</span> <span class="ss">presence</span><span class="p">:</span> <span class="kp">true</span><span class="p">,</span> <span class="ss">uniqueness</span><span class="p">:</span> <span class="kp">true</span>
+</span><span class='line'>  <span class="n">validates</span> <span class="ss">:description</span><span class="p">,</span> <span class="ss">presence</span><span class="p">:</span> <span class="kp">true</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>An important aspect of validation is that the errors are not triggered until the changes hit the database. This means that when creating a new <code>post</code> object, the validation errors will kick in after a <code>.create</code> <code>.update</code> or <code>.save</code> methods are called on <code>Post</code> (but not <code>.new</code>). If validations are successful, the assignment will return true, and otherwise, it will return false.</p>
+
+<h4>Validation Pattern</h4>
+
+<p>When creating the <code>create</code> / <code>update</code> actions from a model-backed form, we use a generalized pattern to handle the validations.</p>
+
+<figure class='code'><figcaption><span>Ex 2: Validation Pattern (app/controllers/posts_controller.rb)</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">create</span>
+</span><span class='line'>  <span class="vi">@post</span> <span class="o">=</span> <span class="no">Post</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">post_params</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">if</span> <span class="vi">@post</span><span class="o">.</span><span class="n">save</span>
+</span><span class='line'>    <span class="n">flash</span><span class="o">[</span><span class="ss">:notice</span><span class="o">]</span> <span class="o">=</span> <span class="s2">&quot;You successfully created a new post.&quot;</span>
+</span><span class='line'>    <span class="n">redirect_to</span> <span class="n">posts_path</span>
+</span><span class='line'>  <span class="k">else</span>
+</span><span class='line'>    <span class="n">render</span> <span class="ss">:new</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">update</span>
+</span><span class='line'>  <span class="vi">@post</span> <span class="o">=</span> <span class="no">Post</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">if</span> <span class="vi">@post</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">post_params</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">flash</span><span class="o">[</span><span class="ss">:notice</span><span class="o">]</span> <span class="o">=</span> <span class="s2">&quot;You successfully updated an existing post.&quot;</span>
+</span><span class='line'>    <span class="n">redirect_to</span> <span class="n">posts_path</span>
+</span><span class='line'>  <span class="k">else</span>
+</span><span class='line'>    <span class="n">render</span> <span class="ss">:edit</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="kp">private</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">post_params</span>
+</span><span class='line'>  <span class="n">params</span><span class="o">.</span><span class="n">require</span><span class="p">(</span><span class="ss">:post</span><span class="p">)</span><span class="o">.</span><span class="n">permit</span><span class="p">(</span><span class="ss">:title</span><span class="p">,</span> <span class="ss">:url</span><span class="p">,</span> <span class="ss">:description</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>There are a variety of interesting things going on here. First, we defined a private method called <code>post_params</code> which sets up the strong parameters as we discussed earlier. Inside the <code>create</code> and <code>update</code> actions, we call <code>post_params</code> to mass assign parameters to the <code>@post</code> object. Second, if the validation is successful, we <code>redirect_to</code> to <code>posts_path</code>. We can actually redirect to wherever we desire, but in this case, we are redirecting to <code>posts#index</code> action where we display all posts. Lastly and perhaps most importantly, if the validation is unsuccessful, we <code>render</code> the form template. This is VERY important!! We CANNOT redirect because if validation fails, we want to display the error messages in the <code>view</code>. This is only possible when we render because the error message is stored inside an instance variable <code>@post.errors</code>. If we redirect, we lose access to that instance variable because we&rsquo;re issuing another HTTP request (HTTP is a <em>stateless</em> protocol).</p>
+
+<p>The <code>.errors</code> method will return a <code>@messages</code> hash that contains all validation error messages. We can extract these messages into an array-like structure using the <code>.errors.full_messages</code> method. We can then iterate through these messages and display them inside our view template:</p>
+
+<figure class='code'><figcaption><span>Ex 3: Displaying Validation Errors</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='erb'><span class='line'><span class="cp">&lt;%=</span> <span class="k">if</span> <span class="vi">@post</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">any?</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">  &lt;h5&gt;There were some errors:&lt;/h5&gt;</span>
+</span><span class='line'><span class="x">  &lt;ul&gt;</span>
+</span><span class='line'><span class="x">    </span><span class="cp">&lt;%</span> <span class="vi">@post</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">full_messages</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">msg</span><span class="o">|</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">      &lt;li&gt;</span><span class="cp">&lt;%=</span> <span class="n">msg</span> <span class="cp">%&gt;</span><span class="x">&lt;/li&gt;</span>
+</span><span class='line'><span class="x">    </span><span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">  &lt;/ul&gt;</span>
+</span><span class='line'><span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<p>Notice here that we are using the <code>@post</code> object. This is again why it is important that we render (instead of redirect) when validation fails, because we need to access the <code>@post</code> instance variable and its associated <code>.errors</code>.</p>
+
+<h4>Summary</h4>
+
+<p>Strong parameters and validations work hand-in-hand within the generalized validation pattern. Rails form is one of the fundamental concepts of the framework and should not be taken for granted. As a Rails developer, it&rsquo;s VERY important to be able to construct and handle forms with ease. You should be able to do it blindfolded, with your hands tied behind your back, and in your sleep. It&rsquo;s THAT important!!!</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Part I: Rails Forms]]></title>
+    <link href="http://tsufurukawa-blog.herokuapp.com/blog/2014/05/13/rails-forms/"/>
+    <updated>2014-05-13T19:55:35-07:00</updated>
+    <id>http://tsufurukawa-blog.herokuapp.com/blog/2014/05/13/rails-forms</id>
+    <content type="html"><![CDATA[<p>In general, there are 3 ways to create and handle forms in Rails: pure html, form helpers, and model-backed form helpers.</p>
+
+<h4>Pure HTML Way</h4>
+
+<p>The pure html way is just that &ndash; pure HTML. So it really has nothing to do with Rails. This approach is shown in the code below:</p>
+
+<figure class='code'><figcaption><span>Ex 1: Form Using Pure HTML</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;form</span> <span class="na">action=</span><span class="s">&#39;/posts&#39;</span> <span class="na">method=</span><span class="s">&#39;POST&#39;</span><span class="nt">&gt;</span>
+</span><span class='line'>  Title: <span class="nt">&lt;input</span> <span class="na">typ=</span><span class="s">&#39;text&#39;</span> <span class="na">name=</span><span class="s">&#39;my_title&#39;</span><span class="nt">&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">&#39;submit&#39;</span><span class="nt">&gt;</span>
+</span><span class='line'><span class="nt">&lt;/form&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The <code>action</code> and <code>method</code> attributes specify the URL and HTTP verb used for the form submission. In other words, the form will be routed to <code>posts#create</code>, which is the action in which the form submission data is parsed and processed to create a new <code>post</code> object. It is important to specify the <code>name</code> attribute inside <code>input</code> because it acts as the key that maps to the value entered in the text field (eg: <code>"my_title" =&gt; "some title"</code>). We can then recover that value by using the params hash like so: <code>params[:my_title]</code>.</p>
+
+<p>Submitting this form will actually result in an <code>InvalidAuthenticityToken Error</code> because of a security issue with cross-site scripting. Rails requires us to verify that the form was submitted from a page we generated, which is accomplished by the presence of an <code>authenticity_token</code>. Since the pure html way does not have an authenticity token built in, we should almost always avoid using this method to handle form submission.</p>
+
+<h4>Rails Non-Model Backed Form Helpers</h4>
+
+<p>The second method is using Non-Model Backed Forrm Helpers. The syntax is shown below:</p>
+
+<figure class='code'><figcaption><span>Ex 2: Form Using Non-Model Backed Form Helpers</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='erb'><span class='line'><span class="cp">&lt;%=</span> <span class="n">form_tag</span> <span class="s1">&#39;/posts&#39;</span> <span class="k">do</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">  </span><span class="cp">&lt;%=</span> <span class="n">label_tag</span> <span class="ss">:title</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">  </span><span class="cp">&lt;%=</span> <span class="n">text_field_tag</span> <span class="ss">:title</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">  &lt;br/&gt;</span>
+</span><span class='line'><span class="x">  </span><span class="cp">&lt;%=</span> <span class="n">submit_tag</span> <span class="s2">&quot;Create Post&quot;</span><span class="p">,</span> <span class="ss">class</span><span class="p">:</span> <span class="s1">&#39;btn btn-primary&#39;</span><span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span><span class="x">  </span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The above code will generate an html like this:</p>
+
+<figure class='code'><figcaption><span>Ex 3: HTML Generated Using Rails Form Helperes</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">&quot;margin:0;padding:0;display:inline&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;input</span> <span class="na">name=</span><span class="s">&quot;utf8&quot;</span> <span class="na">type=</span><span class="s">&quot;hidden&quot;</span> <span class="na">value=</span><span class="s">&quot;✓&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;input</span> <span class="na">name=</span><span class="s">&quot;authenticity_token&quot;</span> <span class="na">type=</span><span class="s">&quot;hidden&quot;</span> <span class="na">value=</span><span class="s">&quot;d/fqhgShsPjPL+Mxslr6fwj4rCbLVMkndsJ1M3DJPiY=&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'><span class="nt">&lt;/div&gt;</span>
+</span><span class='line'><span class="nt">&lt;label</span> <span class="na">for=</span><span class="s">&quot;title&quot;</span><span class="nt">&gt;</span>Title<span class="nt">&lt;/label&gt;</span>
+</span><span class='line'><span class="nt">&lt;input</span> <span class="na">id=</span><span class="s">&quot;title&quot;</span> <span class="na">name=</span><span class="s">&quot;title&quot;</span> <span class="na">type=</span><span class="s">&quot;text&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'><span class="nt">&lt;input</span> <span class="na">class=</span><span class="s">&quot;btn btn-primary&quot;</span> <span class="na">name=</span><span class="s">&quot;commit&quot;</span> <span class="na">type=</span><span class="s">&quot;submit&quot;</span> <span class="na">value=</span><span class="s">&quot;Create Post&quot;</span><span class="nt">&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>As before, we have a <code>name</code> attribute that maps to the value submitted in the text field. But notice we also have a <code>div</code> nestsed inside the <code>form</code> element. Inside this <code>div</code>, we have a hidden <code>authenticity_token</code> that allows us to get around the Cross-Site Requeset Forgery (CSRF) protection that comes with Rails.</p>
+
+<h4>Rails Model-Backed Form Helpers</h4>
+
+<p>Lastly, we have the model-backed form helpers. These are used when performing &ldquo;CRUD&rdquo; actions on a resource (i.e. ActiveRecord model); whereas, non-model backed forms are used everywhere else where ActiveRecord models are not involved. The syntax is shown below:</p>
+
+<figure class='code'><figcaption><span>Ex 4: Form Using Model-Backed Form Helpers</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='erb'><span class='line'><span class="cp">&lt;%=</span> <span class="n">form_for</span> <span class="vi">@post</span> <span class="k">do</span> <span class="o">|</span><span class="n">f</span><span class="o">|</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">  </span><span class="cp">&lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">label</span> <span class="ss">:title</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">  </span><span class="cp">&lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">text_field</span> <span class="ss">:title</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">  </span><span class="cp">&lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">label</span> <span class="ss">:description</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">  </span><span class="cp">&lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">text_area</span> <span class="ss">:description</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">  </span><span class="cp">&lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">submit</span> <span class="s2">&quot;Create Post&quot;</span><span class="p">,</span> <span class="ss">class</span><span class="p">:</span> <span class="s2">&quot;btn btn-primary&quot;</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>There are a couple of interesting (and confusing) conventions at work that makes model-backed forms so useful. First, the <code>form_for</code> takes in a model object instead of a url &ndash; and this is where Rails magic kicks in. If the object is a new object, Rails will send the form to the <code>posts#create</code> action; whereas, if the object is an existing one, Rails will send the form to the <code>posts#update</code> action. In other words, Rails will automatically generate the correct URL and HTTP verb depending on the model object that is passed in to the form. This may sound trivial at first, but this implies that we can use the same form for two different controller actions &ndash; one for <code>new</code> where we pass in a new <code>post</code> object, and one for <code>edit</code> where we pass in an existing <code>post</code> object.</p>
+
+<p>The second interesting feature is that the input element has a name of <code>post[title]</code>, meaning the parameters are nested inside a top-level key of <code>post</code>, as shown here: <code>"post" =&gt; {"title": "some title", "description": "some description"}</code>. We can then do something like this, <code>Post.new(params[:post])</code> to mass assign all attributes values to create a new post.</p>
+
+<p>Lastly, as the name &ldquo;model-backed&rdquo; implies, we can ONLY refer to <em>Attributes</em> or <em>Virtual Attributes</em> available to us by the ActiveRecord model. Therefore, we cannot use arbitrary keys that do not reside in our database. For example, <code>&lt;%= f.text_field :whatever %&gt;</code> will not work because <code>whatever</code> is not a getter/setter that is made available to us by the <code>Post</code> model. This is also why model-backed helpers are used when acting on a resource, and non-model backed helpers are used everywhere else.</p>
+
+<h4>Summary</h4>
+
+<p>To summarize the above in one sentence: never use pure HTML forms, use model-backed forms when working with an ActiveRecord model, and use non model-backed forms for all other occassions. In the next post, we will discuss how to handle the actual submission of the form using strong parameters and validations.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Part II - Rails Conventions]]></title>
@@ -47,7 +274,7 @@
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
 </pre></td><td class='code'><pre><code class='erb'><span class='line'><span class="cp">&lt;%</span> <span class="n">categories</span> <span class="o">=</span> <span class="no">Category</span><span class="o">.</span><span class="n">all</span> <span class="cp">%&gt;</span><span class="x"></span>
-</span><span class='line'><span class="cp">&lt;%</span> <span class="n">categories</span> <span class="k">do</span> <span class="o">|</span><span class="n">category</span><span class="o">|</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="cp">&lt;%</span> <span class="n">categories</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">category</span><span class="o">|</span> <span class="cp">%&gt;</span><span class="x"></span>
 </span><span class='line'><span class="x">  </span><span class="cp">&lt;%=</span> <span class="n">render</span> <span class="s1">&#39;categories/category&#39;</span><span class="p">,</span> <span class="ss">category</span><span class="p">:</span> <span class="n">category</span> <span class="cp">%&gt;</span><span class="x"></span>
 </span><span class='line'><span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span><span class="x"></span>
 </span></code></pre></td></tr></table></div></figure>

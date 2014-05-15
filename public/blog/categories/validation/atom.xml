@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Validation | Tsubasa Furukawa | Web Developer in Training]]></title>
+  <link href="http://tsufurukawa-blog.herokuapp.com/blog/categories/validation/atom.xml" rel="self"/>
+  <link href="http://tsufurukawa-blog.herokuapp.com/"/>
+  <updated>2014-05-14T18:18:45-07:00</updated>
+  <id>http://tsufurukawa-blog.herokuapp.com/</id>
+  <author>
+    <name><![CDATA[Tsubasa Furukawa]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Part II: Rails Forms]]></title>
+    <link href="http://tsufurukawa-blog.herokuapp.com/blog/2014/05/13/part-ii-rails-forms/"/>
+    <updated>2014-05-13T22:41:29-07:00</updated>
+    <id>http://tsufurukawa-blog.herokuapp.com/blog/2014/05/13/part-ii-rails-forms</id>
+    <content type="html"><![CDATA[<p>In the last post, we discussed how to generate forms, how the parameters are stored inside a <code>params</code> hash, and where the form is submitted to. In this post, we talk about how to handle the form submission using validations and strong parameters.</p>
+
+<h4>Strong Parameters</h4>
+
+<p>Strong parameters is a security feature that protects attributes from end-user mass assignment. Quoting the <a href="http://api.rubyonrails.org/classes/ActionController/StrongParameters.html">Rails API</a>,</p>
+
+<blockquote><p>&ldquo;With strong parameters, Action Controller parameters are forbidden to be used in Active Model mass assignments until they have been whitelisted.</p></blockquote>
+
+<p>This means that we manually specify which attributes are allowed for mass updating. To whitelist an entire hash of parameters, the <code>permit!</code> method can be used: <code>params.require(:post).permit!</code>. The <code>require(:post)</code> suggests that the attributes are nested inside a <code>post</code> top-level key (which as we recall, is what we get using model-backed forms).</p>
+
+<h4>Validations</h4>
+
+<p>Next, validations are used to ensure that only valid data is saved into our database. For example, if every post must have <code>title</code>, <code>url</code>, and <code>description</code> attributes for the post to be valid, we must explicitly specify the validation on the <em>Model Layer</em>. Such validations might look like this:</p>
+
+<p><code>ruby Ex 1: Post Model Validation
+class Post &lt; ActiveRecord::Base
+  validates :title, presence: true, length: { minimum: 5 }
+  validates :url, presence: true, uniqueness: true
+  validates :description, presence: true
+end
+</code></p>
+
+<p>An important aspect of validation is that the errors are not triggered until the changes hit the database. This means that when creating a new <code>post</code> object, the validation errors will kick in after a <code>.create</code> <code>.update</code> or <code>.save</code> methods are called on <code>Post</code> (but not <code>.new</code>). If validations are successful, the assignment will return true, and otherwise, it will return false.</p>
+
+<h4>Validation Pattern</h4>
+
+<p>When creating the <code>create</code> / <code>update</code> actions from a model-backed form, we use a generalized pattern to handle the validations.</p>
+
+<p>```ruby Ex 2: Validation Pattern (app/controllers/posts_controller.rb)
+def create
+  @post = Post.new(post_params)</p>
+
+<p>  if @post.save</p>
+
+<pre><code>flash[:notice] = "You successfully created a new post."
+redirect_to posts_path
+</code></pre>
+
+<p>  else</p>
+
+<pre><code>render :new
+</code></pre>
+
+<p>  end
+end</p>
+
+<p>def update
+  @post = Post.find(params[:id])</p>
+
+<p>  if @post.update(post_params)</p>
+
+<pre><code>flash[:notice] = "You successfully updated an existing post."
+redirect_to posts_path
+</code></pre>
+
+<p>  else</p>
+
+<pre><code>render :edit
+</code></pre>
+
+<p>  end
+end</p>
+
+<p>private</p>
+
+<p>def post_params
+  params.require(:post).permit(:title, :url, :description)
+end
+```</p>
+
+<p>There are a variety of interesting things going on here. First, we defined a private method called <code>post_params</code> which sets up the strong parameters as we discussed earlier. Inside the <code>create</code> and <code>update</code> actions, we call <code>post_params</code> to mass assign parameters to the <code>@post</code> object. Second, if the validation is successful, we <code>redirect_to</code> to <code>posts_path</code>. We can actually redirect to wherever we desire, but in this case, we are redirecting to <code>posts#index</code> action where we display all posts. Lastly and perhaps most importantly, if the validation is unsuccessful, we <code>render</code> the form template. This is VERY important!! We CANNOT redirect because if validation fails, we want to display the error messages in the <code>view</code>. This is only possible when we render because the error message is stored inside an instance variable <code>@post.errors</code>. If we redirect, we lose access to that instance variable because we&rsquo;re issuing another HTTP request (HTTP is a <em>stateless</em> protocol).</p>
+
+<p>The <code>.errors</code> method will return a <code>@messages</code> hash that contains all validation error messages. We can extract these messages into an array-like structure using the <code>.errors.full_messages</code> method. We can then iterate through these messages and display them inside our view template:</p>
+
+<p>```erb Ex 3: Displaying Validation Errors
+&lt;%= if @post.errors.any? %>
+  <h5>There were some errors:</h5>
+  <ul></p>
+
+<pre><code>&lt;% @post.errors.full_messages.each do |msg| %&gt;
+  &lt;li&gt;&lt;%= msg %&gt;&lt;/li&gt;
+&lt;% end %&gt;
+</code></pre>
+
+<p>  </ul>
+&lt;% end %>
+```</p>
+
+<p>Notice here that we are using the <code>@post</code> object. This is again why it is important that we render (instead of redirect) when validation fails, because we need to access the <code>@post</code> instance variable and its associated <code>.errors</code>.</p>
+
+<h4>Summary</h4>
+
+<p>Strong parameters and validations work hand-in-hand within the generalized validation pattern. Rails form is one of the fundamental concepts of the framework and should not be taken for granted. As a Rails developer, it&rsquo;s VERY important to be able to construct and handle forms with ease. You should be able to do it blindfolded, with your hands tied behind your back, and in your sleep. It&rsquo;s THAT important!!!</p>
+]]></content>
+  </entry>
+  
+</feed>
