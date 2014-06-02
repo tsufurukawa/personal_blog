@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Part I: Rails Conventions"
+title: "Rails Conventions - Part I"
 date: 2014-05-08 22:33:15 -0700
 comments: true
-categories: [Rails, Rails Convention]
+categories: [Rails, Rails Convention, Partials]
 ---
 
 ####Some Basic Rails Conventions

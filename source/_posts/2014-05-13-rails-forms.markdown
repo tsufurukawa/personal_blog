@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Part I: Rails Forms"
+title: "Rails Forms - Part I"
 date: 2014-05-13 19:55:35 -0700
 comments: true
 categories: [Rails, Forms]

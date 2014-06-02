@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Part II: Rails Forms"
+title: "Rails Forms - Part II"
 date: 2014-05-13 22:41:29 -0700
 comments: true
 categories: [Rails, Forms, Strong Parameters, Validation]
@@ -64,7 +64,7 @@ def post_params
 end
 ```
 
-There are a variety of interesting things going on here. First, we defined a private method called `post_params` which sets up the strong parameters as we discussed earlier. Inside the `create` and `update` actions, we call `post_params` to mass assign parameters to the `@post` object. Second, if the validation is successful, we `redirect_to` to `posts_path`. We can actually redirect to wherever we desire, but in this case, we are redirecting to `posts#index` action where we display all posts. Lastly and perhaps most importantly, if the validation is unsuccessful, we `render` the form template. This is VERY important!! We CANNOT redirect because if validation fails, we want to display the error messages in the `view`. This is only possible when we render because the error message is stored inside an instance variable `@post.errors`. If we redirect, we lose access to that instance variable because we're issuing another HTTP request (HTTP is a *stateless* protocol).
+There are a variety of interesting things going on here. First, we defined a private method called `post_params` which sets up the strong parameters as we discussed earlier. Inside the `create` and `update` actions, we call `post_params` to mass assign parameters to the `@post` object. Second, if the validation is successful, we `redirect_to` to `posts_path`. We can actually redirect to wherever we desire, but in this case, we are redirecting to `posts#index` action where we display all posts. Lastly and perhaps most importantly, if the validation is unsuccessful, we `render` the form template. This is VERY important!! We CANNOT redirect because if validation fails, we want to display the error messages in the view templates. This is only possible when we render because the error is ATTACHED TO THE OBJECT, as in `@post.errors`. If we redirect, we lose access to that instance variable because we're issuing another HTTP request (HTTP is a *stateless* protocol).
 
 The `.errors` method will return a `@messages` hash that contains all validation error messages. We can extract these messages into an array-like structure using the `.errors.full_messages` method. We can then iterate through these messages and display them inside our view template:
 
@@ -79,7 +79,7 @@ The `.errors` method will return a `@messages` hash that contains all validation
 <% end %>
 ```   
 
-Notice here that we are using the `@post` object. This is again why it is important that we render (instead of redirect) when validation fails, because we need to access the `@post` instance variable and its associated `.errors`. 
+Notice here that we are using the `@post` object. This is again why it is important that we render (instead of redirect) when validation fails, because we need to access the `@post` instance variable and the `.errors` attached to the `@post` object. 
 
 ####Summary
 

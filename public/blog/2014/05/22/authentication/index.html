@@ -1,0 +1,314 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Authentication - Part I - Tsubasa Furukawa | Web Developer in Training</title>
+  <meta name="author" content="Tsubasa Furukawa">
+
+  
+  <meta name="description" content="How Password Authentication Works The theory behind how authentication works in Rails is pretty straightforward. We save passwords through a 1-way &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://tsufurukawa-blog.herokuapp.com/blog/2014/05/22/authentication">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Tsubasa Furukawa | Web Developer in Training" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Tsubasa Furukawa | Web Developer in Training</a></h1>
+  
+    <h2>Learning Ruby on Rails</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:tsufurukawa-blog.herokuapp.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Authentication - Part I</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-22T20:15:01-07:00" pubdate data-updated="true">May 22<span>nd</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h4>How Password Authentication Works</h4>
+
+<p>The theory behind how authentication works in Rails is pretty straightforward. We save passwords through a <em>1-way hash</em>, meaning that we hash some string (ie. when user first registers) into a long undecipherable hash token. We then perform authentication, not by decrypting this hash token, but rather by hashing another string (ie. when user logs in) and then checking if the two hashes match.</p>
+
+<p>It&rsquo;s important that we never store the actual password string (like &ldquo;password&rdquo;) in our database &ndash; we instead want to store a string representation of the password in the form of an undecipherable token. This is also called a <em>1-way hash digest</em>. When we authenticate, we compare the two digests, NOT the actual password string. In fact since the hashes are &ldquo;1-way&rdquo;, we cannot convert the digest back into the password string.</p>
+
+<h4>How to Implement Authentication in Rails</h4>
+
+<h6>1. Create <code>password_digest</code> Column in Database</h6>
+
+<p>First, we need a column to keep track of the long token. This column must be called <code>password_digest</code>.</p>
+
+<p><img class="left" src="/images/password_digest.png" width="350" height="350" title="'users_table'" ></p>
+
+<p>This figure shows how a <code>users</code> table may be represented inside of a database. The <code>password_digest</code> attribute stores the long token or digest. The way we generate this token is through a gem called <code>bcrypt-ruby</code>, which uses a complicated hashing algorithm to convert a chunk of data (eg. your user&rsquo;s password) into an undecipherable string. Because this process is not reversible it&rsquo;s impossible to go from the hash back to the password.</p>
+
+<h6>2. <code>has_secure_password</code> in Model</h6>
+
+<p>At the model layer, we use the <code>has_secure_password</code> method to save the passwords in our database. <code>has_secure_password</code> uses the bcrypt gem to generate the one way hash.</p>
+
+<figure class='code'><figcaption><span>User Model with has_secure_password</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="n">has_secure_password</span> <span class="ss">validations</span><span class="p">:</span> <span class="kp">false</span>
+</span><span class='line'>  <span class="n">validates</span> <span class="ss">:password</span><span class="p">,</span> <span class="ss">presence</span><span class="p">:</span> <span class="kp">true</span><span class="p">,</span> <span class="ss">on</span><span class="p">:</span> <span class="ss">:create</span><span class="p">,</span> <span class="ss">length</span><span class="p">:</span> <span class="p">{</span> <span class="ss">minimum</span><span class="p">:</span> <span class="mi">5</span> <span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>has_secure_password</code> has built in validations, which may or may not be useful. In the code above, we remove the default validations by delcaring <code>validations: false</code>. We then declare our own validations manually (although this step is not necessary, it&rsquo;s recommended because it gives us better control of which validations to include and allows us to be more explicit in specifying the validations).</p>
+
+<h6>3. Authenticate Using <code>.password</code> and <code>.authenticate</code></h6>
+
+<p><code>has_secure_password</code> gives us a couple methods that allow us to complete the authentication process. The first is a <code>.password</code> virtual attribute setter method. By calling <code>.password</code> on a <code>user</code> object, <code>bcrypt</code> automatically hashes the password string, which is then stored under the <code>password_digest</code> column. It&rsquo;s noteworthy that there is no getter method for <code>.password</code>, which makes intuitive sense because the original password strings are unrecoverable.</p>
+
+<p>The second method that <code>has_secure_password</code> give us is <code>.authenticate</code>. This method is similar to <code>.password</code> in that we pass in a string which automatically gets converted into a hash token. <code>.authenticate</code> will compare the submitted digest with the stored digest in our database. If the hash tokens match, it&rsquo;ll return the user object which evaluates to true; otherwise, it&rsquo;ll return false.</p>
+
+<p>The following code shows these steps in action:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">u</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;bob&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="n">u</span><span class="o">.</span><span class="n">password</span> <span class="o">=</span> <span class="s1">&#39;password&#39;</span> <span class="c1"># using the &#39;.password&#39; setter method - sets &#39;password_digest&#39;</span>
+</span><span class='line'><span class="n">u</span><span class="o">.</span><span class="n">save</span> <span class="c1"># saves user object in database</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">find_by</span><span class="p">(</span><span class="ss">username</span><span class="p">:</span> <span class="s1">&#39;bob&#39;</span><span class="p">)</span> <span class="c1"># looks for a &#39;bob&#39; user object from database</span>
+</span><span class='line'><span class="n">user</span><span class="o">.</span><span class="n">authenticate</span><span class="p">(</span><span class="s1">&#39;some password&#39;</span><span class="p">)</span> <span class="c1"># returns false because the hash digests do not match</span>
+</span><span class='line'><span class="n">user</span><span class="o">.</span><span class="n">authenticate</span><span class="p">(</span><span class="s1">&#39;password&#39;</span><span class="p">)</span> <span class="c1"># returns the &#39;bob&#39; user object because the hash digests do match</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>Summary</h4>
+
+<p>In this post, we talked about the theory of authentication and how Rails implements them in the database and model layers. In the next post, we&rsquo;ll use a practical example to see how this all comes together.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Tsubasa Furukawa</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-22T20:15:01-07:00" pubdate data-updated="true">May 22<span>nd</span>, 2014</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/authentication/'>Authentication</a>, <a class='category' href='/blog/categories/rails/'>Rails</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/05/13/part-ii-rails-forms/" title="Previous Post: Rails Forms - Part II">&laquo; Rails Forms - Part II</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2014/05/22/authentication-part-part-ii/" title="Next Post: Authentication - Part II">Authentication - Part II &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/06/01/rails-flavored-ajax/">Rails Flavored Ajax</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/05/22/authentication-part-part-ii/">Authentication - Part II</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/05/22/authentication/">Authentication - Part I</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/05/13/part-ii-rails-forms/">Rails Forms - Part II</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/05/13/rails-forms/">Rails Forms - Part I</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/tsufurukawa">@tsufurukawa</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'tsufurukawa',
+            count: 5,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Tsubasa Furukawa -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+      <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'tsufurukawa-blog'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+    
+
+
+
+
+
+
+
+
+
+</body>
+</html>

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Rails | Tsubasa Furukawa | Web Developer in Training]]></title>
   <link href="http://tsufurukawa-blog.herokuapp.com/blog/categories/rails/atom.xml" rel="self"/>
   <link href="http://tsufurukawa-blog.herokuapp.com/"/>
-  <updated>2014-05-14T18:18:45-07:00</updated>
+  <updated>2014-06-01T22:36:19-07:00</updated>
   <id>http://tsufurukawa-blog.herokuapp.com/</id>
   <author>
     <name><![CDATA[Tsubasa Furukawa]]></name>
@@ -14,7 +14,290 @@
 
   
   <entry>
-    <title type="html"><![CDATA[Part II: Rails Forms]]></title>
+    <title type="html"><![CDATA[Rails Flavored Ajax]]></title>
+    <link href="http://tsufurukawa-blog.herokuapp.com/blog/2014/06/01/rails-flavored-ajax/"/>
+    <updated>2014-06-01T18:28:07-07:00</updated>
+    <id>http://tsufurukawa-blog.herokuapp.com/blog/2014/06/01/rails-flavored-ajax</id>
+    <content type="html"><![CDATA[<h4>Unobtrusive Javascript to Handle Ajax</h4>
+
+<p>Ajax stands for Asynchronous Javascript and XML and is a way of sending and retrieving data from a server asynchronously. This is particularly useful when we have a page that is very expensive to load, and we want to update a small portion of the UI without having to reload the entire page from scratch. The basic ajax pattern consists of 3 parts:</p>
+
+<ul>
+<li>Unobtrusive javascript event listener (eg. <code>.click</code>)</li>
+<li>Triggering Ajax request</li>
+<li>Handling the response</li>
+</ul>
+
+
+<p>First, there must be some type of event handler that initiates the Ajax request, such as clicking on a link or submitting a form. Then, the request is sent to the server, and finally the response is generated and sent back to the browser. Unobtrusive javascript or jQuery has been used traditionally for handling Ajax calls. These are known as <em>client side code</em> because they live on the client-side, or on the browser. An example of such code is shown below where we ajaxify the submission of a form.</p>
+
+<p>```javascript Ex1: Ajax with Unobtrusive Javascript
+$(document).ready(function(){
+  $(&lsquo;form#new_post&rsquo;).submit(function(e){</p>
+
+<pre><code>$.ajax({
+  type: 'POST',
+  url: '/posts',
+  data: { title: $('#post_title').val(),
+          url: $('#post_url').val(),
+          description: $('#post_description').val()
+  },
+}).done(function(msg) {
+  // callback function 
+})
+e.preventDefault();
+</code></pre>
+
+<p>  });
+});
+```</p>
+
+<p>In this example, we have a model-backed form with id <code>new_post</code> with the fields <code>title</code>, <code>url</code>, and <code>description</code>. The <code>.submit</code> is the event handler that triggers the Ajax request, and <code>.done</code> is the callback function that handles the response. The <code>data</code> (corresponding to the fields of the form) is wrapped in a hash and sent to the server. This method works perfectly fine, but notice how cumbersome the process is &ndash; we have to manually traverse the DOM and target the HTML elements (i.e. the event handler and the data parameters), every time we wish to issue a different Ajax call. Repeating this process can be time consuming and a bit annoying.</p>
+
+<h4>How Rails Implements Ajax</h4>
+
+<p>Rails drastically simplifies the implementation of Ajax. The Rails syntax for ajaxifying an element is by adding a <code>remote: true</code> attribute. For example, if we want to ajaxify a form submission as before, we would simply say <code>&lt;%= form_for @post, remote: true do |f| %&gt;</code>. The <code>remote: true</code> adds a <code>data-remote=true</code> attribute to the HTML element, which Rails' built-in javascript file uses to convert the form into an Ajax call. This step essentially generates a structure similar to the code in <code>Ex1</code>, and submits the request along with the data parameters.</p>
+
+<p>We can then handle the request inside the <code>posts#create</code>, the controller action that handles the form submission.</p>
+
+<p>```ruby Ex2: Handling the Ajax Request
+def create
+  @post = Post.new(post_params)</p>
+
+<p>  respond_to do |format|</p>
+
+<pre><code>format.html do 
+  if @post.save
+    flash[:notice] = "You successfully created a new post"
+    redirect_to posts_path
+  else
+    render :new 
+  end
+end
+format.js do 
+  @post.save
+end
+</code></pre>
+
+<p>  end
+end
+<code>``   
+Since</code>remote: true<code>ajaxified the form, the client is expecting a javascript response. Rails segregates the response based on the format (eg: html, js, json, html) by using the</code>respond_to<code>method. The block inside</code>format.html<code>will be executed if the client wants HTML in response to the action; whereas, the block inside</code>format.js<code>will be executed for a javascript or Ajax response. As in any other controller action, Rails will by default render a template with the same name as the controller action (ie.</code>/posts/create.js.erb`). Inside this template, we can then write unobtrusive javascript that is then sent back to the browser.</p>
+
+<p>The beauty of this template is that it lives on the <em>server side</em>, meaning we can write ruby code within these templates and access instance variables and other server-side data. This enables us to write code such as</p>
+
+<p><code>javascript Ex3: Inside .js.erb Template
+alert("The title of the post is: &lt;%= @post.title %&gt;");
+</code>
+where we are accessing the <code>@post</code> object and its attribute that live on the server. This is why Rails flavored Ajax is dubbed <em>Server-Generated Javascript Response (SJR)</em> &ndash; the javascript response is generated strictly on the server side, as opposed to unobtrusive javascript shown in <code>Ex1</code>, which handles the response on the client side using a callback function.</p>
+
+<h4>Summmary</h4>
+
+<p>The Rails way of implementing Ajax is a lot less manual and faster than the traditional jQuery method, but it&rsquo;s important to know that under the hood, the two methods are nearly identical. That is, by adding a <code>data-remote=true</code> attribute to an HTML element, Rails uses built-in javascript to convert the element into an Ajax call, which essentially builds the jQuery code from <code>Ex1</code> for us. We can then handle the response by rendering a <code>js.erb</code> file, where we have access to data and instance variables living on the server. The embedded ruby &ndash; javascript code is then converted into pure javascript and sent back to the browser.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Authentication - Part II]]></title>
+    <link href="http://tsufurukawa-blog.herokuapp.com/blog/2014/05/22/authentication-part-part-ii/"/>
+    <updated>2014-05-22T21:54:20-07:00</updated>
+    <id>http://tsufurukawa-blog.herokuapp.com/blog/2014/05/22/authentication-part-part-ii</id>
+    <content type="html"><![CDATA[<p>In this post, we&rsquo;ll simulate a <code>login</code> and <code>logout</code> user interface by introducing a concept called <code>session</code>. A user&rsquo;s session is tracked using a cookie, which exists only in temporary memory while the user is logged in and navigating the website. When the user logs-out, the session cookie is then destroyed.</p>
+
+<h4>Simulating the Login</h4>
+
+<p>Before we create a form allowing users to login, we&rsquo;ll more than likely have to create routes that can handle the request. Now conceptually, we might at first be tempted to simulate login/logout using the <code>users</code> resource, but this is incorrect because we are not creating/updating/deleting, or performing CRUD actions, on a user object. Instead we need a resource that keeps track of the state of whether a user is logged-in or not. We will accomplish this using a <code>SessionsController</code> (the name is arbitrary), and we&rsquo;ll first manually define routes as following:</p>
+
+<p><code>ruby Ex1: Building Resources Routes
+get '/login', to: 'sessions#new'
+post '/login', to: 'sessions#create'
+get '/logout', to: 'sessions#destroy'
+</code></p>
+
+<p>Once we specify the necessary routes, we&rsquo;ll build the controller that handles the various routes. The <code>SessionsController</code> will consist of <code>new</code>, <code>create</code>, and <code>destroy</code> actions, which correspond to creation of login form, submission of login form, and logging-out, respectively. The <code>new</code> action and it&rsquo;s associated view template (<code>new.html.erb</code>) may look somethiing like this:</p>
+
+<p>```ruby Ex2: &lsquo;new&rsquo; Action Inside SessionsController</p>
+
+<h1>Inside SessionsController</h1>
+
+<p>def new
+end
+```</p>
+
+<p>```erb Ex3: &lsquo;new.html.erb&rsquo; &ndash; Form for Login</p>
+
+<div class='well'>
+  <%= form_tag '/login' do %>
+    <div class='control-group'>
+      <%= label_tag :username %>
+      <%= text_field_tag :username %>
+    </div>
+    <div class='control-group'>
+      <%= label_tag :password %>
+      <%= password_field_tag :password %>
+    </div>
+    <%= submit_tag "Login", class: 'btn btn-success' %>
+  <% end %>
+</div>
+
+
+<p>```</p>
+
+<p>In <code>Ex:2</code>, we have an empty <code>new</code> action which simply renders the <code>new.html.erb</code> template by default. Inside our template, we have a non model-backed form &ndash; it is NOT model-backed because <code>sessions</code> is not an ActiveRecord object, meaning we don&rsquo;t have a <code>sessions</code> table in our database. The <code>form_tag '/login'</code> indicates that the the form will be submitted to <code>/login</code> with an HTTP method of <code>post</code>, which of course maps to <code>sessions#create</code>. The login form will look something like this:</p>
+
+<p><img class="center" src="/images/login_form.png" width="350" height="350" title="&lsquo;login_form&rsquo;" ></p>
+
+<p>Now, we will handle the submission of the form inside <code>sessions#create</code>. This code is reflected below:</p>
+
+<p>```ruby Ex4: &lsquo;create&rsquo; Action Inside SessionsController
+def create
+  user = User.find_by(username: params[:username])</p>
+
+<p>  if user &amp;&amp; user.authenticate(params[:password])</p>
+
+<pre><code>flash[:notice] = "You successfully logged in."
+session[:user_id] = user.id
+redirect_to root_path
+</code></pre>
+
+<p>  else</p>
+
+<pre><code>flash[:error] = "There's something wrong with your username or password."
+redirect_to login_path
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>When we submit the form, we gain access to the <code>params</code> hash that will look something like this: <code>{:username=&gt;'some username', :password=&gt;'some password'}</code>. In line 2, we check the database to see whether or not a <code>user</code> object with the specified username exists. Line 4 states that, if such user exists and if the submitted password matches the password stored in the database (ie. password that was stored when a user first registers, which is not shown in this blog post but accomplished via a model-backed user form with <code>username</code> and <code>password</code> fields), the authentication is sucessful. Line 6 is critical because the <code>session</code> tracks the logged-in user. It&rsquo;s also important that we NEVER save objects into a session because sessions are cookie-backed and cookies have a relatively meager 4KB size limit. This is why we&rsquo;re storing the <code>user_id</code> instead of the entire <code>user</code> object.</p>
+
+<p>Using <code>session[:user_id]</code>, we can selectively display UI elements and hide certain elements that unauthenticated users shouldn&rsquo;t have access to. To facilitate this process, we&rsquo;ll introduce several methods in our <code>ApplicationController</code>.</p>
+
+<p>```ruby Ex5: Some Methods Inside ApplicationController
+class ApplicationController &lt; ActionController::Base
+  helper_method :current_user, :logged_in?</p>
+
+<p>  def current_user</p>
+
+<pre><code>@current_user ||= User.find(session[:user_id]) if session[:user_id]
+</code></pre>
+
+<p>  end</p>
+
+<p>  def logged_in?</p>
+
+<pre><code>!!current_user
+</code></pre>
+
+<p>  end</p>
+
+<p>  def require_user</p>
+
+<pre><code>if !logged_in?
+  flash[:error] = "Must be logged in to do that."
+  redirect_to root_pth
+end
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>The <code>current_user</code> method checks to see whether or not <code>session[:user_id]</code> exists, and then returns the user object corresponding to that <code>user_id</code> if the session does indeed exist. If it doesn&rsquo;t, it will return <code>nil</code>. The <code>logged_in?</code> method converts what was returned from <code>current_user</code> into a boolean value &ndash; a <code>user</code> object into <code>true</code>, and <code>nil</code> into <code>false</code>. If we seek to suppress certain features in the UI we can use a conditional to display certain elements. For example, the link to create a new post should only be accessible when a user is logged in. This can be accomplished very easily inside the view template:</p>
+
+<p><code>erb Ex6: Suppressing UI Elements in View Template
+&lt;% if logged_in? %&gt;
+  &lt;%= link_to 'New Post', new_post_path, class: 'btn btn-success' %&gt;
+&lt;% end %&gt;
+</code></p>
+
+<p>Here we are calling the <code>logged_in?</code> method and displaying the <code>New Post</code> button only when the user is logged in. Notice that we have access to this method inside the template even though the method was defined inside <code>ApplicationController</code>. This is because we included <code>helper_method :current_user, :logged_in?</code> inside <code>ApplicationController</code>, which essentially copies the specified methods and moves them over to <code>ApplicationHelper</code>.</p>
+
+<p>Up to this point, we have effectively hidden certain UI elements in our view templates to prevent unauthenticated users from accessing these elements. However, a user can still navigate to a URL such as <code>/posts/new</code>, which will then display a new post form, regardless of whether a user is logged in or not. To prevent this, we will call the <code>require_user</code> method inside all controller actions that should be prohibited from users that are logged-out. For example, we wouldn&rsquo;t want an unauthenticated user from creating, editing or updating a post, so we will call the <code>require_user</code> method in the <code>new</code>, <code>create</code>, <code>edit</code>, <code>update</code> actions inside our <code>PostsController</code>. This method will flash an error and prevent non-logged in users from accessing certain features.</p>
+
+<p>To summarize, whenever we want to prohibit non-logged in users from performing certain actions, we have to suppress BOTH the UI element AND the route. We suppress the UI element by using an <code>if logged_in?</code> inside a view template, and we suppress the route by calling <code>require_user</code> inside a controller action.</p>
+
+<h4>Simulating the Logout</h4>
+
+<p>Simulating the logout is very easy. As we can see from our custom route, <code>get '/logout', to: 'sessions#destroy'</code>, logging out is handled by the <code>destroy</code> action inside <code>SessionsController</code>.</p>
+
+<p><code>ruby Ex7: 'destroy' Action Inside SessionsControllers
+def destroy
+  session[:user_id] = nil
+  flash[:notice] = "You've logged out"
+  redirect_to root_path
+end
+</code></p>
+
+<p>Here we simply set the <code>session[:user_id]</code> to <code>nil</code>. Now, whenever we call the <code>logged_in?</code> method from any of our view templates (like in <code>Ex6</code>), the UI element will not be displayed because the <code>current_user</code> method will return <code>nil</code>, which is then be converted to <code>false</code> by the <code>logged_in?</code> method.</p>
+
+<h4>Summary</h4>
+
+<p>In this post, we walked through the authentication system from scratch. We introduced the session to keep track of which user is logged in, and using this information, we were able to suppress certain features that should be unaccessible to unauthenticated users.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Authentication - Part I]]></title>
+    <link href="http://tsufurukawa-blog.herokuapp.com/blog/2014/05/22/authentication/"/>
+    <updated>2014-05-22T20:15:01-07:00</updated>
+    <id>http://tsufurukawa-blog.herokuapp.com/blog/2014/05/22/authentication</id>
+    <content type="html"><![CDATA[<h4>How Password Authentication Works</h4>
+
+<p>The theory behind how authentication works in Rails is pretty straightforward. We save passwords through a <em>1-way hash</em>, meaning that we hash some string (ie. when user first registers) into a long undecipherable hash token. We then perform authentication, not by decrypting this hash token, but rather by hashing another string (ie. when user logs in) and then checking if the two hashes match.</p>
+
+<p>It&rsquo;s important that we never store the actual password string (like &ldquo;password&rdquo;) in our database &ndash; we instead want to store a string representation of the password in the form of an undecipherable token. This is also called a <em>1-way hash digest</em>. When we authenticate, we compare the two digests, NOT the actual password string. In fact since the hashes are &ldquo;1-way&rdquo;, we cannot convert the digest back into the password string.</p>
+
+<h4>How to Implement Authentication in Rails</h4>
+
+<h6>1. Create <code>password_digest</code> Column in Database</h6>
+
+<p>First, we need a column to keep track of the long token. This column must be called <code>password_digest</code>.</p>
+
+<p><img class="left" src="/images/password_digest.png" width="350" height="350" title="&lsquo;users_table&rsquo;" ></p>
+
+<p>This figure shows how a <code>users</code> table may be represented inside of a database. The <code>password_digest</code> attribute stores the long token or digest. The way we generate this token is through a gem called <code>bcrypt-ruby</code>, which uses a complicated hashing algorithm to convert a chunk of data (eg. your user&rsquo;s password) into an undecipherable string. Because this process is not reversible it&rsquo;s impossible to go from the hash back to the password.</p>
+
+<h6>2. <code>has_secure_password</code> in Model</h6>
+
+<p>At the model layer, we use the <code>has_secure_password</code> method to save the passwords in our database. <code>has_secure_password</code> uses the bcrypt gem to generate the one way hash.</p>
+
+<p><code>ruby User Model with has_secure_password
+class User &lt; ActiveRecord::Base
+  has_secure_password validations: false
+  validates :password, presence: true, on: :create, length: { minimum: 5 }
+end
+</code></p>
+
+<p><code>has_secure_password</code> has built in validations, which may or may not be useful. In the code above, we remove the default validations by delcaring <code>validations: false</code>. We then declare our own validations manually (although this step is not necessary, it&rsquo;s recommended because it gives us better control of which validations to include and allows us to be more explicit in specifying the validations).</p>
+
+<h6>3. Authenticate Using <code>.password</code> and <code>.authenticate</code></h6>
+
+<p><code>has_secure_password</code> gives us a couple methods that allow us to complete the authentication process. The first is a <code>.password</code> virtual attribute setter method. By calling <code>.password</code> on a <code>user</code> object, <code>bcrypt</code> automatically hashes the password string, which is then stored under the <code>password_digest</code> column. It&rsquo;s noteworthy that there is no getter method for <code>.password</code>, which makes intuitive sense because the original password strings are unrecoverable.</p>
+
+<p>The second method that <code>has_secure_password</code> give us is <code>.authenticate</code>. This method is similar to <code>.password</code> in that we pass in a string which automatically gets converted into a hash token. <code>.authenticate</code> will compare the submitted digest with the stored digest in our database. If the hash tokens match, it&rsquo;ll return the user object which evaluates to true; otherwise, it&rsquo;ll return false.</p>
+
+<p>The following code shows these steps in action:</p>
+
+<p>```ruby
+u = User.new(&lsquo;bob&rsquo;)
+u.password = &lsquo;password&rsquo; # using the &lsquo;.password&rsquo; setter method &ndash; sets &lsquo;password_digest&rsquo;
+u.save # saves user object in database</p>
+
+<p>user = User.find_by(username: &lsquo;bob&rsquo;) # looks for a &lsquo;bob&rsquo; user object from database
+user.authenticate(&lsquo;some password&rsquo;) # returns false because the hash digests do not match
+user.authenticate(&lsquo;password&rsquo;) # returns the &lsquo;bob&rsquo; user object because the hash digests do match
+```</p>
+
+<h4>Summary</h4>
+
+<p>In this post, we talked about the theory of authentication and how Rails implements them in the database and model layers. In the next post, we&rsquo;ll use a practical example to see how this all comes together.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Rails Forms - Part II]]></title>
     <link href="http://tsufurukawa-blog.herokuapp.com/blog/2014/05/13/part-ii-rails-forms/"/>
     <updated>2014-05-13T22:41:29-07:00</updated>
     <id>http://tsufurukawa-blog.herokuapp.com/blog/2014/05/13/part-ii-rails-forms</id>
@@ -88,7 +371,7 @@ end</p>
 end
 ```</p>
 
-<p>There are a variety of interesting things going on here. First, we defined a private method called <code>post_params</code> which sets up the strong parameters as we discussed earlier. Inside the <code>create</code> and <code>update</code> actions, we call <code>post_params</code> to mass assign parameters to the <code>@post</code> object. Second, if the validation is successful, we <code>redirect_to</code> to <code>posts_path</code>. We can actually redirect to wherever we desire, but in this case, we are redirecting to <code>posts#index</code> action where we display all posts. Lastly and perhaps most importantly, if the validation is unsuccessful, we <code>render</code> the form template. This is VERY important!! We CANNOT redirect because if validation fails, we want to display the error messages in the <code>view</code>. This is only possible when we render because the error message is stored inside an instance variable <code>@post.errors</code>. If we redirect, we lose access to that instance variable because we&rsquo;re issuing another HTTP request (HTTP is a <em>stateless</em> protocol).</p>
+<p>There are a variety of interesting things going on here. First, we defined a private method called <code>post_params</code> which sets up the strong parameters as we discussed earlier. Inside the <code>create</code> and <code>update</code> actions, we call <code>post_params</code> to mass assign parameters to the <code>@post</code> object. Second, if the validation is successful, we <code>redirect_to</code> to <code>posts_path</code>. We can actually redirect to wherever we desire, but in this case, we are redirecting to <code>posts#index</code> action where we display all posts. Lastly and perhaps most importantly, if the validation is unsuccessful, we <code>render</code> the form template. This is VERY important!! We CANNOT redirect because if validation fails, we want to display the error messages in the view templates. This is only possible when we render because the error is ATTACHED TO THE OBJECT, as in <code>@post.errors</code>. If we redirect, we lose access to that instance variable because we&rsquo;re issuing another HTTP request (HTTP is a <em>stateless</em> protocol).</p>
 
 <p>The <code>.errors</code> method will return a <code>@messages</code> hash that contains all validation error messages. We can extract these messages into an array-like structure using the <code>.errors.full_messages</code> method. We can then iterate through these messages and display them inside our view template:</p>
 
@@ -106,7 +389,7 @@ end
 &lt;% end %>
 ```</p>
 
-<p>Notice here that we are using the <code>@post</code> object. This is again why it is important that we render (instead of redirect) when validation fails, because we need to access the <code>@post</code> instance variable and its associated <code>.errors</code>.</p>
+<p>Notice here that we are using the <code>@post</code> object. This is again why it is important that we render (instead of redirect) when validation fails, because we need to access the <code>@post</code> instance variable and the <code>.errors</code> attached to the <code>@post</code> object.</p>
 
 <h4>Summary</h4>
 
@@ -115,7 +398,7 @@ end
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Part I: Rails Forms]]></title>
+    <title type="html"><![CDATA[Rails Forms - Part I]]></title>
     <link href="http://tsufurukawa-blog.herokuapp.com/blog/2014/05/13/rails-forms/"/>
     <updated>2014-05-13T19:55:35-07:00</updated>
     <id>http://tsufurukawa-blog.herokuapp.com/blog/2014/05/13/rails-forms</id>
@@ -189,156 +472,6 @@ end
 <h4>Summary</h4>
 
 <p>To summarize the above in one sentence: never use pure HTML forms, use model-backed forms when working with an ActiveRecord model, and use non model-backed forms for all other occassions. In the next post, we will discuss how to handle the actual submission of the form using strong parameters and validations.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Part II - Rails Conventions]]></title>
-    <link href="http://tsufurukawa-blog.herokuapp.com/blog/2014/05/09/part-ii/"/>
-    <updated>2014-05-09T11:38:40-07:00</updated>
-    <id>http://tsufurukawa-blog.herokuapp.com/blog/2014/05/09/part-ii</id>
-    <content type="html"><![CDATA[<p>In the previous post we saw that we can pass in a file name such as <code>shared/content_file</code> into a partial, which will then render the <code>_content_file.html.erb</code> file allowing us to create content that is shared among many pages in our application. We can also pass in a local variable such as <code>title</code>, containing dynamic data that changes depending on what value we assign to the variable.</p>
-
-<h4>Rendering Model Instances</h4>
-
-<p>Things can get quite interesting when we pass in model instances to the partial. An example is taken from <a href="http://guides.rubyonrails.org/layouts_and_rendering.html">Rails Guide</a>. Here <code>@customer</code> is an instance of the <code>Customer</code> model, which could&rsquo;ve been defined somewhere in the <code>CustomersController</code> like this <code>@customer = Customer.first</code>.</p>
-
-<p><code>erb Ex 1: Rendering Instance Objects (Simplified Way)
-&lt;%= render @customer %&gt;
-</code></p>
-
-<p>This code will render the partial <code>_customer.html.erb</code> inside <code>views/customers/customer</code> and will &ldquo;pass the local variable <code>customer</code> into the partial which will refer to the <code>@customer</code> in the parent view.&rdquo; Sounds complicated? Well yes, because it is! Essentially the above can be replaced by the following code, with syntax that we are slightly more familiar with.</p>
-
-<p><code>erb Ex 2: Rendering Instance Objects (Explicit Way)
-&lt;%= render 'customers/customer', customer: @customer %&gt;  
-</code></p>
-
-<p>By convention, when we pass in a model instance to a partial, Rails expects the partial to be named after the model (preceded with an underscore) placed inside a directory with a lowercase plural form of the model name (i.e. <code>customers</code>) &ndash; and this is precisely what we see in <em>Ex 2</em>. For the second argument, Rails created a local variable (named after the object model), and set it to the <code>@customer</code> instance variable. In a nutshell, Ex 1 is what we call <em>syntactic sugar</em> that saves us a few extra keystrokes.</p>
-
-<h4>Rendering Collections (Array of Objects)</h4>
-
-<p>Finally, let&rsquo;s say we have an array of objects (aka <em>collection</em>) that we would like to pass in to a partial, so that we can render content dynamically based on data encapsulated within the individual objects. Here is how we might initially approach this problem.</p>
-
-<p><code>erb Ex 3: Rendering Collections (Long Way)
-&lt;% categories = Category.all %&gt;
-&lt;% categories.each do |category| %&gt;
-  &lt;%= render 'categories/category', category: category %&gt;
-&lt;% end %&gt;
-</code></p>
-
-<p>```erb Ex 4: Inside Partial (located inside app/views/categories/_category.html.erb)</p>
-
-<p><p>This is the category name that changes depending on the objects that are passed in: &lt;%= category.name %></p>
-```</p>
-
-<p>By now, Ex 3 should be fairly comprehensible. <code>categories</code> is a collection of <code>category</code> instances. We iterate through the collection, and for every iteration, we render the partial while passing in the <code>category</code> local variable. Then inside the partial template, we can use the <code>category</code> local variable and extract attributes such as <code>name</code> from the object that the local variable is referencing.</p>
-
-<p>Just like everything else in Rails, it turns out there is a shorthand syntax for this.</p>
-
-<p><code>erb Ex 5: Rendering Collections (Short Way)
-&lt;%= categories = Category.all %&gt;
-&lt;%= render categories %&gt;
-</code></p>
-
-<p>That&rsquo;s it!!! Nice and clean. First, Rails recognizes that <code>categories</code> is a collection of objects from the <code>Category</code> model. Second, Rails determines the name of the partial to use by looking at the model name in the collection. Lastly, Rails allows access to each member of the collection, within individual instances of the partial, by assigning each member to a local variable named after the partial. Hence, the code in Ex 5 is entirely identical to the one in Ex 3. Rails Magic!!</p>
-
-<h4>Aside</h4>
-
-<p>Here is another quote I like that I once heard from Jeff Van Gundy, color commentator for ESPN. It turns out thoough, it was originally quoted by Ralph Waldo Emerson.</p>
-
-<blockquote><p>“Your actions speak so loudly, I cannot hear what you are saying.”
-<cite><sub> &ndash; Ralph Waldo Emerson</sub></cite></p></blockquote>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Part I: Rails Conventions]]></title>
-    <link href="http://tsufurukawa-blog.herokuapp.com/blog/2014/05/08/rails-resources/"/>
-    <updated>2014-05-08T22:33:15-07:00</updated>
-    <id>http://tsufurukawa-blog.herokuapp.com/blog/2014/05/08/rails-resources</id>
-    <content type="html"><![CDATA[<h4>Some Basic Rails Conventions</h4>
-
-<p>Now, let&rsquo;s talk Rails. Rails is&hellip;interesting, to say the least. It&rsquo;s only been a week since I&rsquo;ve been exposed to the core ideology behind Rails, so I am far from knowing the ins and outs of the language. Rails is centered around the paradigm of <em>Convention Over Configuration</em>, which in layman&rsquo;s terms &ndash; follow the convention and you&rsquo;ll be grateful, and you&rsquo;re screwed if you don&rsquo;t. I think these conventions are what makes everything in Rails seem so magical, while simultaneously confusing. Until you wrap your head around the fact that a lot goes behind the scenes and some things you just have to take for granted, learning Rails could be quite a challenge.</p>
-
-<p>Here, I present some crazy conventions that I encountered and initially had difficult time digesting; thus, I deemed important to take note.</p>
-
-<p>In Rails (or any MVC framework for that matter), the <em>View</em> contains the content that will be rendered and returned to the browser as part of the HTTP response. An example erb template and the controller that renders the template, are shown below:</p>
-
-<p><code>erb Example ERB Template Under app/views/posts/index.html.erb
-&lt;%= @posts.each do |post| %&gt;
-  &lt;h4&gt;Title: &lt;%= post.title %&gt; &lt;/h4&gt;
-  &lt;p&gt;Description: &lt;%= post.description %&gt;&lt;/p&gt;
-&lt;% end %&gt;
-</code></p>
-
-<p>``` ruby Posts Controller that Renders the View Template Above
-class PostsController &lt; ApplicationController
-  def index</p>
-
-<pre><code>@posts = Post.all
-</code></pre>
-
-<p>  end
-end
-```</p>
-
-<p>Here the <code>PostsController</code> is extracting all <code>Post</code> instances stored in the database called <code>posts</code> (named in such way by convention) and storing it in an instance variable called <code>@posts</code> allowing the erb template to access the data without directly communicating with the Model / Database layer. The template can then iterate through the <code>post</code> objects and display the data contained within those objects (which are essentially table rows when speaking on the database layer). So far, so good.</p>
-
-<p>Every controller action maps to a respective view template (unless of course we redirect instead of render), so as an application grows in complexity, we can expect for code to get cluttered and we often find ourselves repeating the same code in multiple files. It turns out, we can create special templates called <em>partial</em>, in which we can embed the repetitive code. We can then <em>pull in</em> the partial from multiple files whenever we seek to access its content. A code is worth a million words, so here is an example:</p>
-
-<p>``` erb Pulling In a Partial Inside app/views/posts/index.html.erb</p>
-
-<p>This is my main content template, and I'm going to pull in the partial on the next line.</p>
-
-
-
-
-<!-- Pull in the partial -->
-
-
-<p>&lt;%= render &lsquo;shared/content_title&rsquo;, title: &lsquo;All Posts&rsquo; %></p>
-
-<p>This paragraph will be rendered after the partial content</p>
-
-
-<p>
-```</p>
-
-<p>``` erb The Partial That&rsquo;s Being Called Inside app/views/shared/_content_title.html.erb</p>
-
-<h4>This is a Partial</h4>
-
-
-<p><p>&lt;%= title %></p>
-```</p>
-
-<p>All partial files are named with a preceding underscore (again by convention), but strangely enough whenever we render the partial, it is called without the underscore, as shown by the top code. We are also passing a local variable <code>title</code> into the partial, which allows us to render code across multiple files that is similar in structure, but varies in content. Specifically, we can call this partial from any view file (such as show.html.erb or edit.html.erb), and by passing in different values for <code>title</code> we can render dynamic content while maintaining the structure of having the single <code>h4</code> and <code>p</code> tags.</p>
-
-<h4>To Be Continued</h4>
-
-<p>Since this post is getting WAAAY longer than I anticipated, I will continue this discussion on partials and how Rails convention can get a little convoluted on the next post.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[My First Blog Post]]></title>
-    <link href="http://tsufurukawa-blog.herokuapp.com/blog/2014/05/08/my-first-post/"/>
-    <updated>2014-05-08T01:24:34-07:00</updated>
-    <id>http://tsufurukawa-blog.herokuapp.com/blog/2014/05/08/my-first-post</id>
-    <content type="html"><![CDATA[<h4>A Little About Me</h4>
-
-<p>I&rsquo;m a basketball guy. I love playing ball, I love watching the Lakers, and I love playing fantasy basketball. In fact I love basketball so much that I&rsquo;m doing just that as I&rsquo;m writing this blog &ndash; watching Game 2 of Portland vs. San Antonio series. Well, it turns out my sentiments towards programming is just about the opposite. Or more precisely, it <em>was</em>. When I took my first progamming class 6 years ago, I was so lost, so frustrated and so annoyed, that I ended up with a C in the class. Granted, it was a C++ course, which by far is the hardest language I&rsquo;ve ever learned (let&rsquo;s face it, it&rsquo;s like Ruby on steroids), but to a guy who&rsquo;s never seen that infamous letter all throughout his educational career, getting a C was as big a surprise as the Spurs losing Game 6 of last year&rsquo;s NBA finals. Pardon me if I sounded a bit nerdy there. Point is, programming and I were like oil and water. We just didn&rsquo;t mix.</p>
-
-<p>But here I am today, 5 weeks into an online Ruby on Rails Bootcamp called Tealeaf Academy. And quite frankly, I&rsquo;m loving every second of it. How I got here is a whole another story of it&rsquo;s own, but dedicating myself to learn web development is one of the best decisions I&rsquo;ve ever made. In this short amount of time, Tealeaf has already provided me with a foundational knowledge in Ruby, web development, Rails, and more importantly, an appreciation, and at times enjoyment, for the art of coding. In 5 weeks!! Crazy!! And the journey&rsquo;s just begun.</p>
-
-<p>This blog is to record the random tidbits of knowlege that I acquire from this course. I&rsquo;m hoping this acts as not only a mnemonic device for myself, but also as an yearbook of some sort &ndash; something I can look back on ten years from now and reminisce about how ignorant I was and realize how much I have grown since those days. We&rsquo;ll see how dedicated I am in keeping this blog up-to-date, but I&rsquo;m genuinely excited to see how my career as a web developer will unfold.</p>
-
-<h4>Aside</h4>
-
-<p>I&rsquo;m actually a big quote guy as well. Here is a quote that really reasonates with me, by the great Mahatma Gandhi and popularized by the equally great Coach John Wooden.</p>
-
-<blockquote><p>“Live as if you were to die tomorrow. Learn as if you were to live forever.”
-<cite><sub> &ndash; Mahatma Gandhi</sub></cite></p></blockquote>
 ]]></content>
   </entry>
   

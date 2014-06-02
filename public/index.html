@@ -9,7 +9,7 @@
   <meta name="author" content="Tsubasa Furukawa">
 
   
-  <meta name="description" content="In the last post, we discussed how to generate forms, how the parameters are stored inside a params hash, and where the form is submitted to. In this &hellip;">
+  <meta name="description" content="Unobtrusive Javascript to Handle Ajax Ajax stands for Asynchronous Javascript and XML and is a way of sending and retrieving data from a server &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -71,7 +71,453 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/05/13/part-ii-rails-forms/">Part II: Rails Forms</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/06/01/rails-flavored-ajax/">Rails Flavored Ajax</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-01T18:28:07-07:00" pubdate data-updated="true">Jun 1<span>st</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h4>Unobtrusive Javascript to Handle Ajax</h4>
+
+<p>Ajax stands for Asynchronous Javascript and XML and is a way of sending and retrieving data from a server asynchronously. This is particularly useful when we have a page that is very expensive to load, and we want to update a small portion of the UI without having to reload the entire page from scratch. The basic ajax pattern consists of 3 parts:</p>
+
+<ul>
+<li>Unobtrusive javascript event listener (eg. <code>.click</code>)</li>
+<li>Triggering Ajax request</li>
+<li>Handling the response</li>
+</ul>
+
+
+<p>First, there must be some type of event handler that initiates the Ajax request, such as clicking on a link or submitting a form. Then, the request is sent to the server, and finally the response is generated and sent back to the browser. Unobtrusive javascript or jQuery has been used traditionally for handling Ajax calls. These are known as <em>client side code</em> because they live on the client-side, or on the browser. An example of such code is shown below where we ajaxify the submission of a form.</p>
+
+<figure class='code'><figcaption><span>Ex1: Ajax with Unobtrusive Javascript</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">ready</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+</span><span class='line'>  <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;form#new_post&#39;</span><span class="p">).</span><span class="nx">submit</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">){</span>
+</span><span class='line'>    <span class="nx">$</span><span class="p">.</span><span class="nx">ajax</span><span class="p">({</span>
+</span><span class='line'>      <span class="nx">type</span><span class="o">:</span> <span class="s1">&#39;POST&#39;</span><span class="p">,</span>
+</span><span class='line'>      <span class="nx">url</span><span class="o">:</span> <span class="s1">&#39;/posts&#39;</span><span class="p">,</span>
+</span><span class='line'>      <span class="nx">data</span><span class="o">:</span> <span class="p">{</span> <span class="nx">title</span><span class="o">:</span> <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;#post_title&#39;</span><span class="p">).</span><span class="nx">val</span><span class="p">(),</span>
+</span><span class='line'>              <span class="nx">url</span><span class="o">:</span> <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;#post_url&#39;</span><span class="p">).</span><span class="nx">val</span><span class="p">(),</span>
+</span><span class='line'>              <span class="nx">description</span><span class="o">:</span> <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;#post_description&#39;</span><span class="p">).</span><span class="nx">val</span><span class="p">()</span>
+</span><span class='line'>      <span class="p">},</span>
+</span><span class='line'>    <span class="p">}).</span><span class="nx">done</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">msg</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="c1">// callback function </span>
+</span><span class='line'>    <span class="p">})</span>
+</span><span class='line'>    <span class="nx">e</span><span class="p">.</span><span class="nx">preventDefault</span><span class="p">();</span>
+</span><span class='line'>  <span class="p">});</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>In this example, we have a model-backed form with id <code>new_post</code> with the fields <code>title</code>, <code>url</code>, and <code>description</code>. The <code>.submit</code> is the event handler that triggers the Ajax request, and <code>.done</code> is the callback function that handles the response. The <code>data</code> (corresponding to the fields of the form) is wrapped in a hash and sent to the server. This method works perfectly fine, but notice how cumbersome the process is &ndash; we have to manually traverse the DOM and target the HTML elements (i.e. the event handler and the data parameters), every time we wish to issue a different Ajax call. Repeating this process can be time consuming and a bit annoying.</p>
+
+<h4>How Rails Implements Ajax</h4>
+
+<p>Rails drastically simplifies the implementation of Ajax. The Rails syntax for ajaxifying an element is by adding a <code>remote: true</code> attribute. For example, if we want to ajaxify a form submission as before, we would simply say <code>&lt;%= form_for @post, remote: true do |f| %&gt;</code>. The <code>remote: true</code> adds a <code>data-remote=true</code> attribute to the HTML element, which Rails&#8217; built-in javascript file uses to convert the form into an Ajax call. This step essentially generates a structure similar to the code in <code>Ex1</code>, and submits the request along with the data parameters.</p>
+
+<p>We can then handle the request inside the <code>posts#create</code>, the controller action that handles the form submission.</p>
+
+<figure class='code'><figcaption><span>Ex2: Handling the Ajax Request </span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">create</span>
+</span><span class='line'>  <span class="vi">@post</span> <span class="o">=</span> <span class="no">Post</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">post_params</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">respond_to</span> <span class="k">do</span> <span class="o">|</span><span class="nb">format</span><span class="o">|</span>
+</span><span class='line'>    <span class="nb">format</span><span class="o">.</span><span class="n">html</span> <span class="k">do</span>
+</span><span class='line'>      <span class="k">if</span> <span class="vi">@post</span><span class="o">.</span><span class="n">save</span>
+</span><span class='line'>        <span class="n">flash</span><span class="o">[</span><span class="ss">:notice</span><span class="o">]</span> <span class="o">=</span> <span class="s2">&quot;You successfully created a new post&quot;</span>
+</span><span class='line'>        <span class="n">redirect_to</span> <span class="n">posts_path</span>
+</span><span class='line'>      <span class="k">else</span>
+</span><span class='line'>        <span class="n">render</span> <span class="ss">:new</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>    <span class="nb">format</span><span class="o">.</span><span class="n">js</span> <span class="k">do</span>
+</span><span class='line'>      <span class="vi">@post</span><span class="o">.</span><span class="n">save</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p> <br/>
+Since <code>remote: true</code> ajaxified the form, the client is expecting a javascript response. Rails segregates the response based on the format (eg: html, js, json, html) by using the <code>respond_to</code> method. The block inside <code>format.html</code> will be executed if the client wants HTML in response to the action; whereas, the block inside <code>format.js</code> will be executed for a javascript or Ajax response. As in any other controller action, Rails will by default render a template with the same name as the controller action (ie. <code>/posts/create.js.erb</code>). Inside this template, we can then write unobtrusive javascript that is then sent back to the browser.</p>
+
+<p>The beauty of this template is that it lives on the <em>server side</em>, meaning we can write ruby code within these templates and access instance variables and other server-side data. This enables us to write code such as</p>
+
+<figure class='code'><figcaption><span>Ex3: Inside .js.erb Template</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">alert</span><span class="p">(</span><span class="s2">&quot;The title of the post is: &lt;%= @post.title %&gt;&quot;</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>where we are accessing the <code>@post</code> object and its attribute that live on the server. This is why Rails flavored Ajax is dubbed <em>Server-Generated Javascript Response (SJR)</em> &ndash; the javascript response is generated strictly on the server side, as opposed to unobtrusive javascript shown in <code>Ex1</code>, which handles the response on the client side using a callback function.</p>
+
+<h4>Summmary</h4>
+
+<p>The Rails way of implementing Ajax is a lot less manual and faster than the traditional jQuery method, but it&rsquo;s important to know that under the hood, the two methods are nearly identical. That is, by adding a <code>data-remote=true</code> attribute to an HTML element, Rails uses built-in javascript to convert the element into an Ajax call, which essentially builds the jQuery code from <code>Ex1</code> for us. We can then handle the response by rendering a <code>js.erb</code> file, where we have access to data and instance variables living on the server. The embedded ruby &ndash; javascript code is then converted into pure javascript and sent back to the browser.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/22/authentication-part-part-ii/">Authentication - Part II</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-22T21:54:20-07:00" pubdate data-updated="true">May 22<span>nd</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>In this post, we&rsquo;ll simulate a <code>login</code> and <code>logout</code> user interface by introducing a concept called <code>session</code>. A user&rsquo;s session is tracked using a cookie, which exists only in temporary memory while the user is logged in and navigating the website. When the user logs-out, the session cookie is then destroyed.</p>
+
+<h4>Simulating the Login</h4>
+
+<p>Before we create a form allowing users to login, we&rsquo;ll more than likely have to create routes that can handle the request. Now conceptually, we might at first be tempted to simulate login/logout using the <code>users</code> resource, but this is incorrect because we are not creating/updating/deleting, or performing CRUD actions, on a user object. Instead we need a resource that keeps track of the state of whether a user is logged-in or not. We will accomplish this using a <code>SessionsController</code> (the name is arbitrary), and we&rsquo;ll first manually define routes as following:</p>
+
+<figure class='code'><figcaption><span>Ex1: Building Resources Routes</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">get</span> <span class="s1">&#39;/login&#39;</span><span class="p">,</span> <span class="ss">to</span><span class="p">:</span> <span class="s1">&#39;sessions#new&#39;</span>
+</span><span class='line'><span class="n">post</span> <span class="s1">&#39;/login&#39;</span><span class="p">,</span> <span class="ss">to</span><span class="p">:</span> <span class="s1">&#39;sessions#create&#39;</span>
+</span><span class='line'><span class="n">get</span> <span class="s1">&#39;/logout&#39;</span><span class="p">,</span> <span class="ss">to</span><span class="p">:</span> <span class="s1">&#39;sessions#destroy&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Once we specify the necessary routes, we&rsquo;ll build the controller that handles the various routes. The <code>SessionsController</code> will consist of <code>new</code>, <code>create</code>, and <code>destroy</code> actions, which correspond to creation of login form, submission of login form, and logging-out, respectively. The <code>new</code> action and it&rsquo;s associated view template (<code>new.html.erb</code>) may look somethiing like this:</p>
+
+<figure class='code'><figcaption><span>Ex2: &#8216;new&#8217; Action Inside SessionsController</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># Inside SessionsController</span>
+</span><span class='line'><span class="k">def</span> <span class="nf">new</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>Ex3: &#8216;new.html.erb&#8217; - Form for Login</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='erb'><span class='line'><span class="x">&lt;div class=&#39;well&#39;&gt;</span>
+</span><span class='line'><span class="x">  </span><span class="cp">&lt;%=</span> <span class="n">form_tag</span> <span class="s1">&#39;/login&#39;</span> <span class="k">do</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">    &lt;div class=&#39;control-group&#39;&gt;</span>
+</span><span class='line'><span class="x">      </span><span class="cp">&lt;%=</span> <span class="n">label_tag</span> <span class="ss">:username</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">      </span><span class="cp">&lt;%=</span> <span class="n">text_field_tag</span> <span class="ss">:username</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">    &lt;/div&gt;</span>
+</span><span class='line'><span class="x">    &lt;div class=&#39;control-group&#39;&gt;</span>
+</span><span class='line'><span class="x">      </span><span class="cp">&lt;%=</span> <span class="n">label_tag</span> <span class="ss">:password</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">      </span><span class="cp">&lt;%=</span> <span class="n">password_field_tag</span> <span class="ss">:password</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">    &lt;/div&gt;</span>
+</span><span class='line'><span class="x">    </span><span class="cp">&lt;%=</span> <span class="n">submit_tag</span> <span class="s2">&quot;Login&quot;</span><span class="p">,</span> <span class="ss">class</span><span class="p">:</span> <span class="s1">&#39;btn btn-success&#39;</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">  </span><span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">&lt;/div&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>In <code>Ex:2</code>, we have an empty <code>new</code> action which simply renders the <code>new.html.erb</code> template by default. Inside our template, we have a non model-backed form &ndash; it is NOT model-backed because <code>sessions</code> is not an ActiveRecord object, meaning we don&rsquo;t have a <code>sessions</code> table in our database. The <code>form_tag '/login'</code> indicates that the the form will be submitted to <code>/login</code> with an HTTP method of <code>post</code>, which of course maps to <code>sessions#create</code>. The login form will look something like this:</p>
+
+<p><img class="center" src="/images/login_form.png" width="350" height="350" title="'login_form'" ></p>
+
+<p>Now, we will handle the submission of the form inside <code>sessions#create</code>. This code is reflected below:</p>
+
+<figure class='code'><figcaption><span>Ex4: &#8216;create&#8217; Action Inside SessionsController</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">create</span>
+</span><span class='line'>  <span class="n">user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">find_by</span><span class="p">(</span><span class="ss">username</span><span class="p">:</span> <span class="n">params</span><span class="o">[</span><span class="ss">:username</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">if</span> <span class="n">user</span> <span class="o">&amp;&amp;</span> <span class="n">user</span><span class="o">.</span><span class="n">authenticate</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:password</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">flash</span><span class="o">[</span><span class="ss">:notice</span><span class="o">]</span> <span class="o">=</span> <span class="s2">&quot;You successfully logged in.&quot;</span>
+</span><span class='line'>    <span class="n">session</span><span class="o">[</span><span class="ss">:user_id</span><span class="o">]</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="n">id</span>
+</span><span class='line'>    <span class="n">redirect_to</span> <span class="n">root_path</span>
+</span><span class='line'>  <span class="k">else</span>
+</span><span class='line'>    <span class="n">flash</span><span class="o">[</span><span class="ss">:error</span><span class="o">]</span> <span class="o">=</span> <span class="s2">&quot;There&#39;s something wrong with your username or password.&quot;</span>
+</span><span class='line'>    <span class="n">redirect_to</span> <span class="n">login_path</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>When we submit the form, we gain access to the <code>params</code> hash that will look something like this: <code>{:username=&gt;'some username', :password=&gt;'some password'}</code>. In line 2, we check the database to see whether or not a <code>user</code> object with the specified username exists. Line 4 states that, if such user exists and if the submitted password matches the password stored in the database (ie. password that was stored when a user first registers, which is not shown in this blog post but accomplished via a model-backed user form with <code>username</code> and <code>password</code> fields), the authentication is sucessful. Line 6 is critical because the <code>session</code> tracks the logged-in user. It&rsquo;s also important that we NEVER save objects into a session because sessions are cookie-backed and cookies have a relatively meager 4KB size limit. This is why we&rsquo;re storing the <code>user_id</code> instead of the entire <code>user</code> object.</p>
+
+<p>Using <code>session[:user_id]</code>, we can selectively display UI elements and hide certain elements that unauthenticated users shouldn&rsquo;t have access to. To facilitate this process, we&rsquo;ll introduce several methods in our <code>ApplicationController</code>.</p>
+
+<figure class='code'><figcaption><span>Ex5: Some Methods Inside ApplicationController</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ApplicationController</span> <span class="o">&lt;</span> <span class="ss">ActionController</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="n">helper_method</span> <span class="ss">:current_user</span><span class="p">,</span> <span class="ss">:logged_in?</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">current_user</span>
+</span><span class='line'>    <span class="vi">@current_user</span> <span class="o">||=</span> <span class="no">User</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">session</span><span class="o">[</span><span class="ss">:user_id</span><span class="o">]</span><span class="p">)</span> <span class="k">if</span> <span class="n">session</span><span class="o">[</span><span class="ss">:user_id</span><span class="o">]</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">logged_in?</span>
+</span><span class='line'>    <span class="o">!!</span><span class="n">current_user</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">require_user</span>
+</span><span class='line'>    <span class="k">if</span> <span class="o">!</span><span class="n">logged_in?</span>
+</span><span class='line'>      <span class="n">flash</span><span class="o">[</span><span class="ss">:error</span><span class="o">]</span> <span class="o">=</span> <span class="s2">&quot;Must be logged in to do that.&quot;</span>
+</span><span class='line'>      <span class="n">redirect_to</span> <span class="n">root_pth</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The <code>current_user</code> method checks to see whether or not <code>session[:user_id]</code> exists, and then returns the user object corresponding to that <code>user_id</code> if the session does indeed exist. If it doesn&rsquo;t, it will return <code>nil</code>. The <code>logged_in?</code> method converts what was returned from <code>current_user</code> into a boolean value &ndash; a <code>user</code> object into <code>true</code>, and <code>nil</code> into <code>false</code>. If we seek to suppress certain features in the UI we can use a conditional to display certain elements. For example, the link to create a new post should only be accessible when a user is logged in. This can be accomplished very easily inside the view template:</p>
+
+<figure class='code'><figcaption><span>Ex6: Suppressing UI Elements in View Template</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='erb'><span class='line'><span class="cp">&lt;%</span> <span class="k">if</span> <span class="n">logged_in?</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="x">  </span><span class="cp">&lt;%=</span> <span class="n">link_to</span> <span class="s1">&#39;New Post&#39;</span><span class="p">,</span> <span class="n">new_post_path</span><span class="p">,</span> <span class="ss">class</span><span class="p">:</span> <span class="s1">&#39;btn btn-success&#39;</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span><span class='line'><span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span><span class="x"></span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<p>Here we are calling the <code>logged_in?</code> method and displaying the <code>New Post</code> button only when the user is logged in. Notice that we have access to this method inside the template even though the method was defined inside <code>ApplicationController</code>. This is because we included <code>helper_method :current_user, :logged_in?</code> inside <code>ApplicationController</code>, which essentially copies the specified methods and moves them over to <code>ApplicationHelper</code>.</p>
+
+<p>Up to this point, we have effectively hidden certain UI elements in our view templates to prevent unauthenticated users from accessing these elements. However, a user can still navigate to a URL such as <code>/posts/new</code>, which will then display a new post form, regardless of whether a user is logged in or not. To prevent this, we will call the <code>require_user</code> method inside all controller actions that should be prohibited from users that are logged-out. For example, we wouldn&rsquo;t want an unauthenticated user from creating, editing or updating a post, so we will call the <code>require_user</code> method in the <code>new</code>, <code>create</code>, <code>edit</code>, <code>update</code> actions inside our <code>PostsController</code>. This method will flash an error and prevent non-logged in users from accessing certain features.</p>
+
+<p>To summarize, whenever we want to prohibit non-logged in users from performing certain actions, we have to suppress BOTH the UI element AND the route. We suppress the UI element by using an <code>if logged_in?</code> inside a view template, and we suppress the route by calling <code>require_user</code> inside a controller action.</p>
+
+<h4>Simulating the Logout</h4>
+
+<p>Simulating the logout is very easy. As we can see from our custom route, <code>get '/logout', to: 'sessions#destroy'</code>, logging out is handled by the <code>destroy</code> action inside <code>SessionsController</code>.</p>
+
+<figure class='code'><figcaption><span>Ex7: &#8216;destroy&#8217; Action Inside SessionsControllers</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">destroy</span>
+</span><span class='line'>  <span class="n">session</span><span class="o">[</span><span class="ss">:user_id</span><span class="o">]</span> <span class="o">=</span> <span class="kp">nil</span>
+</span><span class='line'>  <span class="n">flash</span><span class="o">[</span><span class="ss">:notice</span><span class="o">]</span> <span class="o">=</span> <span class="s2">&quot;You&#39;ve logged out&quot;</span>
+</span><span class='line'>  <span class="n">redirect_to</span> <span class="n">root_path</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Here we simply set the <code>session[:user_id]</code> to <code>nil</code>. Now, whenever we call the <code>logged_in?</code> method from any of our view templates (like in <code>Ex6</code>), the UI element will not be displayed because the <code>current_user</code> method will return <code>nil</code>, which is then be converted to <code>false</code> by the <code>logged_in?</code> method.</p>
+
+<h4>Summary</h4>
+
+<p>In this post, we walked through the authentication system from scratch. We introduced the session to keep track of which user is logged in, and using this information, we were able to suppress certain features that should be unaccessible to unauthenticated users.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/22/authentication/">Authentication - Part I</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-22T20:15:01-07:00" pubdate data-updated="true">May 22<span>nd</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h4>How Password Authentication Works</h4>
+
+<p>The theory behind how authentication works in Rails is pretty straightforward. We save passwords through a <em>1-way hash</em>, meaning that we hash some string (ie. when user first registers) into a long undecipherable hash token. We then perform authentication, not by decrypting this hash token, but rather by hashing another string (ie. when user logs in) and then checking if the two hashes match.</p>
+
+<p>It&rsquo;s important that we never store the actual password string (like &ldquo;password&rdquo;) in our database &ndash; we instead want to store a string representation of the password in the form of an undecipherable token. This is also called a <em>1-way hash digest</em>. When we authenticate, we compare the two digests, NOT the actual password string. In fact since the hashes are &ldquo;1-way&rdquo;, we cannot convert the digest back into the password string.</p>
+
+<h4>How to Implement Authentication in Rails</h4>
+
+<h6>1. Create <code>password_digest</code> Column in Database</h6>
+
+<p>First, we need a column to keep track of the long token. This column must be called <code>password_digest</code>.</p>
+
+<p><img class="left" src="/images/password_digest.png" width="350" height="350" title="'users_table'" ></p>
+
+<p>This figure shows how a <code>users</code> table may be represented inside of a database. The <code>password_digest</code> attribute stores the long token or digest. The way we generate this token is through a gem called <code>bcrypt-ruby</code>, which uses a complicated hashing algorithm to convert a chunk of data (eg. your user&rsquo;s password) into an undecipherable string. Because this process is not reversible it&rsquo;s impossible to go from the hash back to the password.</p>
+
+<h6>2. <code>has_secure_password</code> in Model</h6>
+
+<p>At the model layer, we use the <code>has_secure_password</code> method to save the passwords in our database. <code>has_secure_password</code> uses the bcrypt gem to generate the one way hash.</p>
+
+<figure class='code'><figcaption><span>User Model with has_secure_password</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="n">has_secure_password</span> <span class="ss">validations</span><span class="p">:</span> <span class="kp">false</span>
+</span><span class='line'>  <span class="n">validates</span> <span class="ss">:password</span><span class="p">,</span> <span class="ss">presence</span><span class="p">:</span> <span class="kp">true</span><span class="p">,</span> <span class="ss">on</span><span class="p">:</span> <span class="ss">:create</span><span class="p">,</span> <span class="ss">length</span><span class="p">:</span> <span class="p">{</span> <span class="ss">minimum</span><span class="p">:</span> <span class="mi">5</span> <span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>has_secure_password</code> has built in validations, which may or may not be useful. In the code above, we remove the default validations by delcaring <code>validations: false</code>. We then declare our own validations manually (although this step is not necessary, it&rsquo;s recommended because it gives us better control of which validations to include and allows us to be more explicit in specifying the validations).</p>
+
+<h6>3. Authenticate Using <code>.password</code> and <code>.authenticate</code></h6>
+
+<p><code>has_secure_password</code> gives us a couple methods that allow us to complete the authentication process. The first is a <code>.password</code> virtual attribute setter method. By calling <code>.password</code> on a <code>user</code> object, <code>bcrypt</code> automatically hashes the password string, which is then stored under the <code>password_digest</code> column. It&rsquo;s noteworthy that there is no getter method for <code>.password</code>, which makes intuitive sense because the original password strings are unrecoverable.</p>
+
+<p>The second method that <code>has_secure_password</code> give us is <code>.authenticate</code>. This method is similar to <code>.password</code> in that we pass in a string which automatically gets converted into a hash token. <code>.authenticate</code> will compare the submitted digest with the stored digest in our database. If the hash tokens match, it&rsquo;ll return the user object which evaluates to true; otherwise, it&rsquo;ll return false.</p>
+
+<p>The following code shows these steps in action:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">u</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;bob&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="n">u</span><span class="o">.</span><span class="n">password</span> <span class="o">=</span> <span class="s1">&#39;password&#39;</span> <span class="c1"># using the &#39;.password&#39; setter method - sets &#39;password_digest&#39;</span>
+</span><span class='line'><span class="n">u</span><span class="o">.</span><span class="n">save</span> <span class="c1"># saves user object in database</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">find_by</span><span class="p">(</span><span class="ss">username</span><span class="p">:</span> <span class="s1">&#39;bob&#39;</span><span class="p">)</span> <span class="c1"># looks for a &#39;bob&#39; user object from database</span>
+</span><span class='line'><span class="n">user</span><span class="o">.</span><span class="n">authenticate</span><span class="p">(</span><span class="s1">&#39;some password&#39;</span><span class="p">)</span> <span class="c1"># returns false because the hash digests do not match</span>
+</span><span class='line'><span class="n">user</span><span class="o">.</span><span class="n">authenticate</span><span class="p">(</span><span class="s1">&#39;password&#39;</span><span class="p">)</span> <span class="c1"># returns the &#39;bob&#39; user object because the hash digests do match</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>Summary</h4>
+
+<p>In this post, we talked about the theory of authentication and how Rails implements them in the database and model layers. In the next post, we&rsquo;ll use a practical example to see how this all comes together.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/13/part-ii-rails-forms/">Rails Forms - Part II</a></h1>
     
     
       <p class="meta">
@@ -184,7 +630,7 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>There are a variety of interesting things going on here. First, we defined a private method called <code>post_params</code> which sets up the strong parameters as we discussed earlier. Inside the <code>create</code> and <code>update</code> actions, we call <code>post_params</code> to mass assign parameters to the <code>@post</code> object. Second, if the validation is successful, we <code>redirect_to</code> to <code>posts_path</code>. We can actually redirect to wherever we desire, but in this case, we are redirecting to <code>posts#index</code> action where we display all posts. Lastly and perhaps most importantly, if the validation is unsuccessful, we <code>render</code> the form template. This is VERY important!! We CANNOT redirect because if validation fails, we want to display the error messages in the <code>view</code>. This is only possible when we render because the error message is stored inside an instance variable <code>@post.errors</code>. If we redirect, we lose access to that instance variable because we&rsquo;re issuing another HTTP request (HTTP is a <em>stateless</em> protocol).</p>
+<p>There are a variety of interesting things going on here. First, we defined a private method called <code>post_params</code> which sets up the strong parameters as we discussed earlier. Inside the <code>create</code> and <code>update</code> actions, we call <code>post_params</code> to mass assign parameters to the <code>@post</code> object. Second, if the validation is successful, we <code>redirect_to</code> to <code>posts_path</code>. We can actually redirect to wherever we desire, but in this case, we are redirecting to <code>posts#index</code> action where we display all posts. Lastly and perhaps most importantly, if the validation is unsuccessful, we <code>render</code> the form template. This is VERY important!! We CANNOT redirect because if validation fails, we want to display the error messages in the view templates. This is only possible when we render because the error is ATTACHED TO THE OBJECT, as in <code>@post.errors</code>. If we redirect, we lose access to that instance variable because we&rsquo;re issuing another HTTP request (HTTP is a <em>stateless</em> protocol).</p>
 
 <p>The <code>.errors</code> method will return a <code>@messages</code> hash that contains all validation error messages. We can extract these messages into an array-like structure using the <code>.errors.full_messages</code> method. We can then iterate through these messages and display them inside our view template:</p>
 
@@ -209,7 +655,7 @@
 
 <p></p>
 
-<p>Notice here that we are using the <code>@post</code> object. This is again why it is important that we render (instead of redirect) when validation fails, because we need to access the <code>@post</code> instance variable and its associated <code>.errors</code>.</p>
+<p>Notice here that we are using the <code>@post</code> object. This is again why it is important that we render (instead of redirect) when validation fails, because we need to access the <code>@post</code> instance variable and the <code>.errors</code> attached to the <code>@post</code> object.</p>
 
 <h4>Summary</h4>
 
@@ -226,7 +672,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/05/13/rails-forms/">Part I: Rails Forms</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/05/13/rails-forms/">Rails Forms - Part I</a></h1>
     
     
       <p class="meta">
@@ -352,7 +798,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/05/09/part-ii/">Part II - Rails Conventions</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/05/09/part-ii/">Rails Conventions - Part II</a></h1>
     
     
       <p class="meta">
@@ -448,7 +894,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/05/08/rails-resources/">Part I: Rails Conventions</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/05/08/rails-resources/">Rails Conventions - Part I</a></h1>
     
     
       <p class="meta">
@@ -607,23 +1053,23 @@
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2014/05/13/part-ii-rails-forms/">Part II: Rails Forms</a>
+        <a href="/blog/2014/06/01/rails-flavored-ajax/">Rails Flavored Ajax</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/05/13/rails-forms/">Part I: Rails Forms</a>
+        <a href="/blog/2014/05/22/authentication-part-part-ii/">Authentication - Part II</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/05/09/part-ii/">Part II - Rails Conventions</a>
+        <a href="/blog/2014/05/22/authentication/">Authentication - Part I</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/05/08/rails-resources/">Part I: Rails Conventions</a>
+        <a href="/blog/2014/05/13/part-ii-rails-forms/">Rails Forms - Part II</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/05/08/my-first-post/">My First Blog Post</a>
+        <a href="/blog/2014/05/13/rails-forms/">Rails Forms - Part I</a>
       </li>
     
   </ul>

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Validation | Tsubasa Furukawa | Web Developer in Training]]></title>
   <link href="http://tsufurukawa-blog.herokuapp.com/blog/categories/validation/atom.xml" rel="self"/>
   <link href="http://tsufurukawa-blog.herokuapp.com/"/>
-  <updated>2014-05-14T18:18:45-07:00</updated>
+  <updated>2014-06-01T22:36:19-07:00</updated>
   <id>http://tsufurukawa-blog.herokuapp.com/</id>
   <author>
     <name><![CDATA[Tsubasa Furukawa]]></name>
@@ -14,7 +14,7 @@
 
   
   <entry>
-    <title type="html"><![CDATA[Part II: Rails Forms]]></title>
+    <title type="html"><![CDATA[Rails Forms - Part II]]></title>
     <link href="http://tsufurukawa-blog.herokuapp.com/blog/2014/05/13/part-ii-rails-forms/"/>
     <updated>2014-05-13T22:41:29-07:00</updated>
     <id>http://tsufurukawa-blog.herokuapp.com/blog/2014/05/13/part-ii-rails-forms</id>
@@ -88,7 +88,7 @@ end</p>
 end
 ```</p>
 
-<p>There are a variety of interesting things going on here. First, we defined a private method called <code>post_params</code> which sets up the strong parameters as we discussed earlier. Inside the <code>create</code> and <code>update</code> actions, we call <code>post_params</code> to mass assign parameters to the <code>@post</code> object. Second, if the validation is successful, we <code>redirect_to</code> to <code>posts_path</code>. We can actually redirect to wherever we desire, but in this case, we are redirecting to <code>posts#index</code> action where we display all posts. Lastly and perhaps most importantly, if the validation is unsuccessful, we <code>render</code> the form template. This is VERY important!! We CANNOT redirect because if validation fails, we want to display the error messages in the <code>view</code>. This is only possible when we render because the error message is stored inside an instance variable <code>@post.errors</code>. If we redirect, we lose access to that instance variable because we&rsquo;re issuing another HTTP request (HTTP is a <em>stateless</em> protocol).</p>
+<p>There are a variety of interesting things going on here. First, we defined a private method called <code>post_params</code> which sets up the strong parameters as we discussed earlier. Inside the <code>create</code> and <code>update</code> actions, we call <code>post_params</code> to mass assign parameters to the <code>@post</code> object. Second, if the validation is successful, we <code>redirect_to</code> to <code>posts_path</code>. We can actually redirect to wherever we desire, but in this case, we are redirecting to <code>posts#index</code> action where we display all posts. Lastly and perhaps most importantly, if the validation is unsuccessful, we <code>render</code> the form template. This is VERY important!! We CANNOT redirect because if validation fails, we want to display the error messages in the view templates. This is only possible when we render because the error is ATTACHED TO THE OBJECT, as in <code>@post.errors</code>. If we redirect, we lose access to that instance variable because we&rsquo;re issuing another HTTP request (HTTP is a <em>stateless</em> protocol).</p>
 
 <p>The <code>.errors</code> method will return a <code>@messages</code> hash that contains all validation error messages. We can extract these messages into an array-like structure using the <code>.errors.full_messages</code> method. We can then iterate through these messages and display them inside our view template:</p>
 
@@ -106,7 +106,7 @@ end
 &lt;% end %>
 ```</p>
 
-<p>Notice here that we are using the <code>@post</code> object. This is again why it is important that we render (instead of redirect) when validation fails, because we need to access the <code>@post</code> instance variable and its associated <code>.errors</code>.</p>
+<p>Notice here that we are using the <code>@post</code> object. This is again why it is important that we render (instead of redirect) when validation fails, because we need to access the <code>@post</code> instance variable and the <code>.errors</code> attached to the <code>@post</code> object.</p>
 
 <h4>Summary</h4>
 

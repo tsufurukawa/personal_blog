@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Ajax | Tsubasa Furukawa | Web Developer in Training]]></title>
+  <link href="http://tsufurukawa-blog.herokuapp.com/blog/categories/ajax/atom.xml" rel="self"/>
+  <link href="http://tsufurukawa-blog.herokuapp.com/"/>
+  <updated>2014-06-01T22:36:19-07:00</updated>
+  <id>http://tsufurukawa-blog.herokuapp.com/</id>
+  <author>
+    <name><![CDATA[Tsubasa Furukawa]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Rails Flavored Ajax]]></title>
+    <link href="http://tsufurukawa-blog.herokuapp.com/blog/2014/06/01/rails-flavored-ajax/"/>
+    <updated>2014-06-01T18:28:07-07:00</updated>
+    <id>http://tsufurukawa-blog.herokuapp.com/blog/2014/06/01/rails-flavored-ajax</id>
+    <content type="html"><![CDATA[<h4>Unobtrusive Javascript to Handle Ajax</h4>
+
+<p>Ajax stands for Asynchronous Javascript and XML and is a way of sending and retrieving data from a server asynchronously. This is particularly useful when we have a page that is very expensive to load, and we want to update a small portion of the UI without having to reload the entire page from scratch. The basic ajax pattern consists of 3 parts:</p>
+
+<ul>
+<li>Unobtrusive javascript event listener (eg. <code>.click</code>)</li>
+<li>Triggering Ajax request</li>
+<li>Handling the response</li>
+</ul>
+
+
+<p>First, there must be some type of event handler that initiates the Ajax request, such as clicking on a link or submitting a form. Then, the request is sent to the server, and finally the response is generated and sent back to the browser. Unobtrusive javascript or jQuery has been used traditionally for handling Ajax calls. These are known as <em>client side code</em> because they live on the client-side, or on the browser. An example of such code is shown below where we ajaxify the submission of a form.</p>
+
+<p>```javascript Ex1: Ajax with Unobtrusive Javascript
+$(document).ready(function(){
+  $(&lsquo;form#new_post&rsquo;).submit(function(e){</p>
+
+<pre><code>$.ajax({
+  type: 'POST',
+  url: '/posts',
+  data: { title: $('#post_title').val(),
+          url: $('#post_url').val(),
+          description: $('#post_description').val()
+  },
+}).done(function(msg) {
+  // callback function 
+})
+e.preventDefault();
+</code></pre>
+
+<p>  });
+});
+```</p>
+
+<p>In this example, we have a model-backed form with id <code>new_post</code> with the fields <code>title</code>, <code>url</code>, and <code>description</code>. The <code>.submit</code> is the event handler that triggers the Ajax request, and <code>.done</code> is the callback function that handles the response. The <code>data</code> (corresponding to the fields of the form) is wrapped in a hash and sent to the server. This method works perfectly fine, but notice how cumbersome the process is &ndash; we have to manually traverse the DOM and target the HTML elements (i.e. the event handler and the data parameters), every time we wish to issue a different Ajax call. Repeating this process can be time consuming and a bit annoying.</p>
+
+<h4>How Rails Implements Ajax</h4>
+
+<p>Rails drastically simplifies the implementation of Ajax. The Rails syntax for ajaxifying an element is by adding a <code>remote: true</code> attribute. For example, if we want to ajaxify a form submission as before, we would simply say <code>&lt;%= form_for @post, remote: true do |f| %&gt;</code>. The <code>remote: true</code> adds a <code>data-remote=true</code> attribute to the HTML element, which Rails' built-in javascript file uses to convert the form into an Ajax call. This step essentially generates a structure similar to the code in <code>Ex1</code>, and submits the request along with the data parameters.</p>
+
+<p>We can then handle the request inside the <code>posts#create</code>, the controller action that handles the form submission.</p>
+
+<p>```ruby Ex2: Handling the Ajax Request
+def create
+  @post = Post.new(post_params)</p>
+
+<p>  respond_to do |format|</p>
+
+<pre><code>format.html do 
+  if @post.save
+    flash[:notice] = "You successfully created a new post"
+    redirect_to posts_path
+  else
+    render :new 
+  end
+end
+format.js do 
+  @post.save
+end
+</code></pre>
+
+<p>  end
+end
+<code>``   
+Since</code>remote: true<code>ajaxified the form, the client is expecting a javascript response. Rails segregates the response based on the format (eg: html, js, json, html) by using the</code>respond_to<code>method. The block inside</code>format.html<code>will be executed if the client wants HTML in response to the action; whereas, the block inside</code>format.js<code>will be executed for a javascript or Ajax response. As in any other controller action, Rails will by default render a template with the same name as the controller action (ie.</code>/posts/create.js.erb`). Inside this template, we can then write unobtrusive javascript that is then sent back to the browser.</p>
+
+<p>The beauty of this template is that it lives on the <em>server side</em>, meaning we can write ruby code within these templates and access instance variables and other server-side data. This enables us to write code such as</p>
+
+<p><code>javascript Ex3: Inside .js.erb Template
+alert("The title of the post is: &lt;%= @post.title %&gt;");
+</code>
+where we are accessing the <code>@post</code> object and its attribute that live on the server. This is why Rails flavored Ajax is dubbed <em>Server-Generated Javascript Response (SJR)</em> &ndash; the javascript response is generated strictly on the server side, as opposed to unobtrusive javascript shown in <code>Ex1</code>, which handles the response on the client side using a callback function.</p>
+
+<h4>Summmary</h4>
+
+<p>The Rails way of implementing Ajax is a lot less manual and faster than the traditional jQuery method, but it&rsquo;s important to know that under the hood, the two methods are nearly identical. That is, by adding a <code>data-remote=true</code> attribute to an HTML element, Rails uses built-in javascript to convert the element into an Ajax call, which essentially builds the jQuery code from <code>Ex1</code> for us. We can then handle the response by rendering a <code>js.erb</code> file, where we have access to data and instance variables living on the server. The embedded ruby &ndash; javascript code is then converted into pure javascript and sent back to the browser.</p>
+]]></content>
+  </entry>
+  
+</feed>

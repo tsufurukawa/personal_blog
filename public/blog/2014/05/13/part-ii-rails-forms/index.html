@@ -5,7 +5,7 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Part II: Rails Forms - Tsubasa Furukawa | Web Developer in Training</title>
+  <title>Rails Forms - Part II - Tsubasa Furukawa | Web Developer in Training</title>
   <meta name="author" content="Tsubasa Furukawa">
 
   
@@ -68,7 +68,7 @@
   
   <header>
     
-      <h1 class="entry-title">Part II: Rails Forms</h1>
+      <h1 class="entry-title">Rails Forms - Part II</h1>
     
     
       <p class="meta">
@@ -181,7 +181,7 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>There are a variety of interesting things going on here. First, we defined a private method called <code>post_params</code> which sets up the strong parameters as we discussed earlier. Inside the <code>create</code> and <code>update</code> actions, we call <code>post_params</code> to mass assign parameters to the <code>@post</code> object. Second, if the validation is successful, we <code>redirect_to</code> to <code>posts_path</code>. We can actually redirect to wherever we desire, but in this case, we are redirecting to <code>posts#index</code> action where we display all posts. Lastly and perhaps most importantly, if the validation is unsuccessful, we <code>render</code> the form template. This is VERY important!! We CANNOT redirect because if validation fails, we want to display the error messages in the <code>view</code>. This is only possible when we render because the error message is stored inside an instance variable <code>@post.errors</code>. If we redirect, we lose access to that instance variable because we&rsquo;re issuing another HTTP request (HTTP is a <em>stateless</em> protocol).</p>
+<p>There are a variety of interesting things going on here. First, we defined a private method called <code>post_params</code> which sets up the strong parameters as we discussed earlier. Inside the <code>create</code> and <code>update</code> actions, we call <code>post_params</code> to mass assign parameters to the <code>@post</code> object. Second, if the validation is successful, we <code>redirect_to</code> to <code>posts_path</code>. We can actually redirect to wherever we desire, but in this case, we are redirecting to <code>posts#index</code> action where we display all posts. Lastly and perhaps most importantly, if the validation is unsuccessful, we <code>render</code> the form template. This is VERY important!! We CANNOT redirect because if validation fails, we want to display the error messages in the view templates. This is only possible when we render because the error is ATTACHED TO THE OBJECT, as in <code>@post.errors</code>. If we redirect, we lose access to that instance variable because we&rsquo;re issuing another HTTP request (HTTP is a <em>stateless</em> protocol).</p>
 
 <p>The <code>.errors</code> method will return a <code>@messages</code> hash that contains all validation error messages. We can extract these messages into an array-like structure using the <code>.errors.full_messages</code> method. We can then iterate through these messages and display them inside our view template:</p>
 
@@ -206,7 +206,7 @@
 
 <p></p>
 
-<p>Notice here that we are using the <code>@post</code> object. This is again why it is important that we render (instead of redirect) when validation fails, because we need to access the <code>@post</code> instance variable and its associated <code>.errors</code>.</p>
+<p>Notice here that we are using the <code>@post</code> object. This is again why it is important that we render (instead of redirect) when validation fails, because we need to access the <code>@post</code> instance variable and the <code>.errors</code> attached to the <code>@post</code> object.</p>
 
 <h4>Summary</h4>
 
@@ -254,8 +254,10 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2014/05/13/rails-forms/" title="Previous Post: Part I: Rails Forms">&laquo; Part I: Rails Forms</a>
+        <a class="basic-alignment left" href="/blog/2014/05/13/rails-forms/" title="Previous Post: Rails Forms - Part I">&laquo; Rails Forms - Part I</a>
       
+      
+        <a class="basic-alignment right" href="/blog/2014/05/22/authentication/" title="Next Post: Authentication - Part I">Authentication - Part I &raquo;</a>
       
     </p>
   </footer>
@@ -276,23 +278,23 @@
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2014/05/13/part-ii-rails-forms/">Part II: Rails Forms</a>
+        <a href="/blog/2014/06/01/rails-flavored-ajax/">Rails Flavored Ajax</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/05/13/rails-forms/">Part I: Rails Forms</a>
+        <a href="/blog/2014/05/22/authentication-part-part-ii/">Authentication - Part II</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/05/09/part-ii/">Part II - Rails Conventions</a>
+        <a href="/blog/2014/05/22/authentication/">Authentication - Part I</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/05/08/rails-resources/">Part I: Rails Conventions</a>
+        <a href="/blog/2014/05/13/part-ii-rails-forms/">Rails Forms - Part II</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/05/08/my-first-post/">My First Blog Post</a>
+        <a href="/blog/2014/05/13/rails-forms/">Rails Forms - Part I</a>
       </li>
     
   </ul>
