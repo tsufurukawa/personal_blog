@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Rails | Tsubasa Furukawa | Web Developer in Training]]></title>
   <link href="http://tsufurukawa-blog.herokuapp.com/blog/categories/rails/atom.xml" rel="self"/>
   <link href="http://tsufurukawa-blog.herokuapp.com/"/>
-  <updated>2014-06-01T22:36:19-07:00</updated>
+  <updated>2014-08-05T09:27:36-07:00</updated>
   <id>http://tsufurukawa-blog.herokuapp.com/</id>
   <author>
     <name><![CDATA[Tsubasa Furukawa]]></name>
@@ -12,6 +12,156 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Feature Spec With Capybara]]></title>
+    <link href="http://tsufurukawa-blog.herokuapp.com/blog/2014/08/04/feature-spec-with-capybara/"/>
+    <updated>2014-08-04T21:19:29-07:00</updated>
+    <id>http://tsufurukawa-blog.herokuapp.com/blog/2014/08/04/feature-spec-with-capybara</id>
+    <content type="html"><![CDATA[<p>When designing a web application, or any computer software for that matter, having automated tests is absolutely critical. In general, tests can be broken down into 3 categories:</p>
+
+<p><strong>1. Unit Tests</strong> &ndash; testing different components in isolation <br/>
+<strong>2. Functional Tests</strong> &ndash; testing multiple components in collaboration and making sure individual components work well with each other<br/>
+<strong>3. Integration Tests</strong> &ndash; following a business process and ensuring the components can work together to achieve a business objective</p>
+
+<p>Now, in the context of Rails, these sections can be broken down as:<br/>
+1. Models, Views, Helpers, Routes &ndash;> Unit Tests<br/>
+2. Controllers &ndash;> Functional Tests<br/>
+3. Emulating End User &ldquo;Browser Experience&rdquo; &ndash;> Integration Tests</p>
+
+<p>In this blog post, we&rsquo;ll go through a simple feature spec using  <strong>Capybara</strong> with <strong>RSpec</strong>.</p>
+
+<h4>Basic Setup</h4>
+
+<p>Capybara helps us test web applications by simulating how a real user would interact with our app. It works seamlessly with RSpec, and most importantly, it&rsquo;s got an intuitive API that reads very cleanly. Let&rsquo;s look at an example.</p>
+
+<p>Start off by installing the <code>capybara</code> and <code>capybara-email</code> gems inside your Gemfile.</p>
+
+<p><code>ruby Ex1: Install Capybara in Gemfile
+group :test do
+  gem 'capybara'
+  gem 'capybara-email'
+end
+</code></p>
+
+<p>Next, inside <code>rails_helper.rb</code>, add these lines of code:</p>
+
+<p><code>ruby Ex2: Inside Test Helper File
+require 'capybara/rails'
+require 'capybara/email/rspec'
+</code></p>
+
+<p>Lastly, create a file called <code>user_resets_password_spec.rb</code> inside the <code>spec/features</code> directory. We&rsquo;re now ready to start writing out the test!!!</p>
+
+<p>As the name of the file suggests, this particular feature spec mimics the user experience of resetting his/her password. The basic setup of this feature spec is as follows:</p>
+
+<p>```ruby Ex3: Setting Up &ldquo;Reset Password&rdquo; Spec
+require &lsquo;rails_helper&rsquo;</p>
+
+<p>feature &ldquo;User resets password&rdquo; do
+  scenario &ldquo;user forgets and resets password successfully&rdquo; do</p>
+
+<pre><code># Setup the data
+user = Fabricate(:user, name: "Joe Smith", email: "test@example.com", password: "password")
+clear_email
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>Here, we&rsquo;re using an object generation library called <code>Fabrication</code> to generate the <code>user</code> object. The <code>clear_email</code> method is a convenient method given to us by the <code>capybara-email</code> gem, which simply clears the email message queue. (Note: Sending emails is a huge topic in and of itself, but basically whenever emails are sent using ActionMailer, they get stored in a message queue. We must clear this queue to ensure a clean slate and that any extraneous emails are wiped out.)</p>
+
+<h4>Simulating the User Experience</h4>
+
+<p>When a user forgets the password, the first thing he/she will do is to click on the &ldquo;Forgot Password?&rdquo; link. The sign-up for this particular app looks something like this, and the user experience can be mimicked with the following bit of code:</p>
+
+<p><img class="center" src="/images/sign_up_form.png" width="400" height="350" title="&lsquo;sign_up_form&rsquo;" ></p>
+
+<p><code>ruby Ex3: User Clicks on "Forgot Password" Link
+visit sign_in_path
+click_link "Forgot Password?"
+</code></p>
+
+<p>Notice how readable this bit of code is!! This is the beauty of working with the Capybara API &ndash; even a non-programmer can read and decipher the code.</p>
+
+<p>Once the user clicks on the link, it will redirect to this page where the user is prompted to enter an email address. Then inside our server side code (specifically inside the <code>ForgotPasswordsController</code>, we send out an email with directions to reset the password if the said email address does indeed exist in our database.</p>
+
+<p><img class="center" src="/images/forgot_password_form.png" width="600" height="260" title="&lsquo;forgot_password_form&rsquo;" ></p>
+
+<p>The Capybara code that mimics this user experience is again very straightforward.</p>
+
+<p><code>ruby Ex4: User Fills out Email Address
+fill_in "Email Address", with: user.email
+click_button "Send Email"
+</code></p>
+
+<p>Upon submission of the form, the user will receive an email with a <code>"Reset Password"</code> link. Clicking on this link will redirect the user to the &ldquo;Password Reset&rdquo; page where the user is prompted to enter a new password. This sequence of events is depicted with the following lines of code:</p>
+
+<p>```ruby Ex5: User Clicks on &ldquo;Reset Password&rdquo; Link and Enters New Password
+open_email(user.email)
+current_email.click_link &ldquo;Reset Password&rdquo;</p>
+
+<p>fill_in &ldquo;New Password&rdquo;, with: &ldquo;new password&rdquo;
+click_button &ldquo;Reset Password&rdquo;
+```</p>
+
+<p><img class="center" src="/images/reset_password_form.png" width="550" height="260" title="&lsquo;reset_password_form&rsquo;" ></p>
+
+<p>The <code>open_email</code> method finds the latest email sent to the specified address (<code>user.email</code>), and sets the <code>current_email</code> so that we can inspect its content.</p>
+
+<p>Finally, the user will fill out the sign-in form with the <code>"new password"</code> to ensure he can successfully log in.</p>
+
+<p><code>ruby Ex6: User Signs In with New Password
+fill_in "Email Address", with: user.email
+fill_in "Password", with: "new password"
+click_button "Sign in"
+expect(page).to have_content("Welcome #{user.name}!! You successfully signed in.")
+clear_emails
+</code></p>
+
+<p>The <code>expect(page).to have_content(...)</code> is an <em>assertion</em>, which is basically a way of verifying the results are what we expected.</p>
+
+<p>The complete spec is as follows:</p>
+
+<p>```ruby Ex7: The Complete Feature Spec for Resetting Password
+require &lsquo;rails_helper&rsquo;</p>
+
+<p>feature &ldquo;User resets password&rdquo; do
+  scenario &ldquo;user forgets and resets password&rdquo; do</p>
+
+<pre><code>user = Fabricate(:user, name: "Joe Smith", email: "test@example.com", password: "password")
+clear_emails
+
+visit sign_in_path
+click_link "Forgot Password?" 
+
+fill_in "Email Address", with: user.email
+click_button "Send Email"
+
+open_email(user.email)
+current_email.click_link "Reset Password"
+
+fill_in "New Password", with: "new password"
+click_button "Reset Password"
+
+fill_in "Email Address", with: user.email
+fill_in "Password", with: "new password"
+click_button "Sign in"
+expect(page).to have_content("Welcome #{user.name}!! You successfully signed in.")
+
+clear_emails
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<h4>Summary</h4>
+
+<p>As we saw from this example, Capybara has an extremely intuitive set of APIs that makes integration testing simple and even enjoyable (at times). Having automated tests helps guard against <em>regression</em>, a common problem in software development where an application stops functioning as intended after an addition of a new feature. Automated testing can become quite tedious, especially during early stages of application development; however, without it, it is simply impossible to tell whether or not the entire system is bug-free after a new feature is introduced.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Rails Flavored Ajax]]></title>
@@ -394,84 +544,6 @@ end
 <h4>Summary</h4>
 
 <p>Strong parameters and validations work hand-in-hand within the generalized validation pattern. Rails form is one of the fundamental concepts of the framework and should not be taken for granted. As a Rails developer, it&rsquo;s VERY important to be able to construct and handle forms with ease. You should be able to do it blindfolded, with your hands tied behind your back, and in your sleep. It&rsquo;s THAT important!!!</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Rails Forms - Part I]]></title>
-    <link href="http://tsufurukawa-blog.herokuapp.com/blog/2014/05/13/rails-forms/"/>
-    <updated>2014-05-13T19:55:35-07:00</updated>
-    <id>http://tsufurukawa-blog.herokuapp.com/blog/2014/05/13/rails-forms</id>
-    <content type="html"><![CDATA[<p>In general, there are 3 ways to create and handle forms in Rails: pure html, form helpers, and model-backed form helpers.</p>
-
-<h4>Pure HTML Way</h4>
-
-<p>The pure html way is just that &ndash; pure HTML. So it really has nothing to do with Rails. This approach is shown in the code below:</p>
-
-<p><code>html Ex 1: Form Using Pure HTML
-&lt;form action='/posts' method='POST'&gt;
-  Title: &lt;input typ='text' name='my_title'&gt;
-  &lt;input type='submit'&gt;
-&lt;/form&gt;
-</code></p>
-
-<p>The <code>action</code> and <code>method</code> attributes specify the URL and HTTP verb used for the form submission. In other words, the form will be routed to <code>posts#create</code>, which is the action in which the form submission data is parsed and processed to create a new <code>post</code> object. It is important to specify the <code>name</code> attribute inside <code>input</code> because it acts as the key that maps to the value entered in the text field (eg: <code>"my_title" =&gt; "some title"</code>). We can then recover that value by using the params hash like so: <code>params[:my_title]</code>.</p>
-
-<p>Submitting this form will actually result in an <code>InvalidAuthenticityToken Error</code> because of a security issue with cross-site scripting. Rails requires us to verify that the form was submitted from a page we generated, which is accomplished by the presence of an <code>authenticity_token</code>. Since the pure html way does not have an authenticity token built in, we should almost always avoid using this method to handle form submission.</p>
-
-<h4>Rails Non-Model Backed Form Helpers</h4>
-
-<p>The second method is using Non-Model Backed Forrm Helpers. The syntax is shown below:</p>
-
-<p><code>erb Ex 2: Form Using Non-Model Backed Form Helpers
-&lt;%= form_tag '/posts' do %&gt;
-  &lt;%= label_tag :title %&gt;
-  &lt;%= text_field_tag :title %&gt;
-  &lt;br/&gt;
-  &lt;%= submit_tag "Create Post", class: 'btn btn-primary'%&gt;
-&lt;% end %&gt;  
-</code></p>
-
-<p>The above code will generate an html like this:</p>
-
-<p>```html Ex 3: HTML Generated Using Rails Form Helperes</p>
-
-<div style="margin:0;padding:0;display:inline">
-  <input name="utf8" type="hidden" value="✓">
-  <input name="authenticity_token" type="hidden" value="d/fqhgShsPjPL+Mxslr6fwj4rCbLVMkndsJ1M3DJPiY=">
-</div>
-
-
-<p><label for="title">Title</label>
-<input id="title" name="title" type="text">
-<input class="btn btn-primary" name="commit" type="submit" value="Create Post">
-```</p>
-
-<p>As before, we have a <code>name</code> attribute that maps to the value submitted in the text field. But notice we also have a <code>div</code> nestsed inside the <code>form</code> element. Inside this <code>div</code>, we have a hidden <code>authenticity_token</code> that allows us to get around the Cross-Site Requeset Forgery (CSRF) protection that comes with Rails.</p>
-
-<h4>Rails Model-Backed Form Helpers</h4>
-
-<p>Lastly, we have the model-backed form helpers. These are used when performing &ldquo;CRUD&rdquo; actions on a resource (i.e. ActiveRecord model); whereas, non-model backed forms are used everywhere else where ActiveRecord models are not involved. The syntax is shown below:</p>
-
-<p><code>erb Ex 4: Form Using Model-Backed Form Helpers
-&lt;%= form_for @post do |f| %&gt;
-  &lt;%= f.label :title %&gt;
-  &lt;%= f.text_field :title %&gt;
-  &lt;%= f.label :description %&gt;
-  &lt;%= f.text_area :description %&gt;
-  &lt;%= f.submit "Create Post", class: "btn btn-primary" %&gt;
-&lt;% end %&gt;
-</code></p>
-
-<p>There are a couple of interesting (and confusing) conventions at work that makes model-backed forms so useful. First, the <code>form_for</code> takes in a model object instead of a url &ndash; and this is where Rails magic kicks in. If the object is a new object, Rails will send the form to the <code>posts#create</code> action; whereas, if the object is an existing one, Rails will send the form to the <code>posts#update</code> action. In other words, Rails will automatically generate the correct URL and HTTP verb depending on the model object that is passed in to the form. This may sound trivial at first, but this implies that we can use the same form for two different controller actions &ndash; one for <code>new</code> where we pass in a new <code>post</code> object, and one for <code>edit</code> where we pass in an existing <code>post</code> object.</p>
-
-<p>The second interesting feature is that the input element has a name of <code>post[title]</code>, meaning the parameters are nested inside a top-level key of <code>post</code>, as shown here: <code>"post" =&gt; {"title": "some title", "description": "some description"}</code>. We can then do something like this, <code>Post.new(params[:post])</code> to mass assign all attributes values to create a new post.</p>
-
-<p>Lastly, as the name &ldquo;model-backed&rdquo; implies, we can ONLY refer to <em>Attributes</em> or <em>Virtual Attributes</em> available to us by the ActiveRecord model. Therefore, we cannot use arbitrary keys that do not reside in our database. For example, <code>&lt;%= f.text_field :whatever %&gt;</code> will not work because <code>whatever</code> is not a getter/setter that is made available to us by the <code>Post</code> model. This is also why model-backed helpers are used when acting on a resource, and non-model backed helpers are used everywhere else.</p>
-
-<h4>Summary</h4>
-
-<p>To summarize the above in one sentence: never use pure HTML forms, use model-backed forms when working with an ActiveRecord model, and use non model-backed forms for all other occassions. In the next post, we will discuss how to handle the actual submission of the form using strong parameters and validations.</p>
 ]]></content>
   </entry>
   

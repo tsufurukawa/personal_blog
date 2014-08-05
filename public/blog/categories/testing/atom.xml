@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Testing | Tsubasa Furukawa | Web Developer in Training]]></title>
+  <link href="http://tsufurukawa-blog.herokuapp.com/blog/categories/testing/atom.xml" rel="self"/>
+  <link href="http://tsufurukawa-blog.herokuapp.com/"/>
+  <updated>2014-08-05T09:27:36-07:00</updated>
+  <id>http://tsufurukawa-blog.herokuapp.com/</id>
+  <author>
+    <name><![CDATA[Tsubasa Furukawa]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Feature Spec With Capybara]]></title>
+    <link href="http://tsufurukawa-blog.herokuapp.com/blog/2014/08/04/feature-spec-with-capybara/"/>
+    <updated>2014-08-04T21:19:29-07:00</updated>
+    <id>http://tsufurukawa-blog.herokuapp.com/blog/2014/08/04/feature-spec-with-capybara</id>
+    <content type="html"><![CDATA[<p>When designing a web application, or any computer software for that matter, having automated tests is absolutely critical. In general, tests can be broken down into 3 categories:</p>
+
+<p><strong>1. Unit Tests</strong> &ndash; testing different components in isolation <br/>
+<strong>2. Functional Tests</strong> &ndash; testing multiple components in collaboration and making sure individual components work well with each other<br/>
+<strong>3. Integration Tests</strong> &ndash; following a business process and ensuring the components can work together to achieve a business objective</p>
+
+<p>Now, in the context of Rails, these sections can be broken down as:<br/>
+1. Models, Views, Helpers, Routes &ndash;> Unit Tests<br/>
+2. Controllers &ndash;> Functional Tests<br/>
+3. Emulating End User &ldquo;Browser Experience&rdquo; &ndash;> Integration Tests</p>
+
+<p>In this blog post, we&rsquo;ll go through a simple feature spec using  <strong>Capybara</strong> with <strong>RSpec</strong>.</p>
+
+<h4>Basic Setup</h4>
+
+<p>Capybara helps us test web applications by simulating how a real user would interact with our app. It works seamlessly with RSpec, and most importantly, it&rsquo;s got an intuitive API that reads very cleanly. Let&rsquo;s look at an example.</p>
+
+<p>Start off by installing the <code>capybara</code> and <code>capybara-email</code> gems inside your Gemfile.</p>
+
+<p><code>ruby Ex1: Install Capybara in Gemfile
+group :test do
+  gem 'capybara'
+  gem 'capybara-email'
+end
+</code></p>
+
+<p>Next, inside <code>rails_helper.rb</code>, add these lines of code:</p>
+
+<p><code>ruby Ex2: Inside Test Helper File
+require 'capybara/rails'
+require 'capybara/email/rspec'
+</code></p>
+
+<p>Lastly, create a file called <code>user_resets_password_spec.rb</code> inside the <code>spec/features</code> directory. We&rsquo;re now ready to start writing out the test!!!</p>
+
+<p>As the name of the file suggests, this particular feature spec mimics the user experience of resetting his/her password. The basic setup of this feature spec is as follows:</p>
+
+<p>```ruby Ex3: Setting Up &ldquo;Reset Password&rdquo; Spec
+require &lsquo;rails_helper&rsquo;</p>
+
+<p>feature &ldquo;User resets password&rdquo; do
+  scenario &ldquo;user forgets and resets password successfully&rdquo; do</p>
+
+<pre><code># Setup the data
+user = Fabricate(:user, name: "Joe Smith", email: "test@example.com", password: "password")
+clear_email
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>Here, we&rsquo;re using an object generation library called <code>Fabrication</code> to generate the <code>user</code> object. The <code>clear_email</code> method is a convenient method given to us by the <code>capybara-email</code> gem, which simply clears the email message queue. (Note: Sending emails is a huge topic in and of itself, but basically whenever emails are sent using ActionMailer, they get stored in a message queue. We must clear this queue to ensure a clean slate and that any extraneous emails are wiped out.)</p>
+
+<h4>Simulating the User Experience</h4>
+
+<p>When a user forgets the password, the first thing he/she will do is to click on the &ldquo;Forgot Password?&rdquo; link. The sign-up for this particular app looks something like this, and the user experience can be mimicked with the following bit of code:</p>
+
+<p><img class="center" src="/images/sign_up_form.png" width="400" height="350" title="&lsquo;sign_up_form&rsquo;" ></p>
+
+<p><code>ruby Ex3: User Clicks on "Forgot Password" Link
+visit sign_in_path
+click_link "Forgot Password?"
+</code></p>
+
+<p>Notice how readable this bit of code is!! This is the beauty of working with the Capybara API &ndash; even a non-programmer can read and decipher the code.</p>
+
+<p>Once the user clicks on the link, it will redirect to this page where the user is prompted to enter an email address. Then inside our server side code (specifically inside the <code>ForgotPasswordsController</code>, we send out an email with directions to reset the password if the said email address does indeed exist in our database.</p>
+
+<p><img class="center" src="/images/forgot_password_form.png" width="600" height="260" title="&lsquo;forgot_password_form&rsquo;" ></p>
+
+<p>The Capybara code that mimics this user experience is again very straightforward.</p>
+
+<p><code>ruby Ex4: User Fills out Email Address
+fill_in "Email Address", with: user.email
+click_button "Send Email"
+</code></p>
+
+<p>Upon submission of the form, the user will receive an email with a <code>"Reset Password"</code> link. Clicking on this link will redirect the user to the &ldquo;Password Reset&rdquo; page where the user is prompted to enter a new password. This sequence of events is depicted with the following lines of code:</p>
+
+<p>```ruby Ex5: User Clicks on &ldquo;Reset Password&rdquo; Link and Enters New Password
+open_email(user.email)
+current_email.click_link &ldquo;Reset Password&rdquo;</p>
+
+<p>fill_in &ldquo;New Password&rdquo;, with: &ldquo;new password&rdquo;
+click_button &ldquo;Reset Password&rdquo;
+```</p>
+
+<p><img class="center" src="/images/reset_password_form.png" width="550" height="260" title="&lsquo;reset_password_form&rsquo;" ></p>
+
+<p>The <code>open_email</code> method finds the latest email sent to the specified address (<code>user.email</code>), and sets the <code>current_email</code> so that we can inspect its content.</p>
+
+<p>Finally, the user will fill out the sign-in form with the <code>"new password"</code> to ensure he can successfully log in.</p>
+
+<p><code>ruby Ex6: User Signs In with New Password
+fill_in "Email Address", with: user.email
+fill_in "Password", with: "new password"
+click_button "Sign in"
+expect(page).to have_content("Welcome #{user.name}!! You successfully signed in.")
+clear_emails
+</code></p>
+
+<p>The <code>expect(page).to have_content(...)</code> is an <em>assertion</em>, which is basically a way of verifying the results are what we expected.</p>
+
+<p>The complete spec is as follows:</p>
+
+<p>```ruby Ex7: The Complete Feature Spec for Resetting Password
+require &lsquo;rails_helper&rsquo;</p>
+
+<p>feature &ldquo;User resets password&rdquo; do
+  scenario &ldquo;user forgets and resets password&rdquo; do</p>
+
+<pre><code>user = Fabricate(:user, name: "Joe Smith", email: "test@example.com", password: "password")
+clear_emails
+
+visit sign_in_path
+click_link "Forgot Password?" 
+
+fill_in "Email Address", with: user.email
+click_button "Send Email"
+
+open_email(user.email)
+current_email.click_link "Reset Password"
+
+fill_in "New Password", with: "new password"
+click_button "Reset Password"
+
+fill_in "Email Address", with: user.email
+fill_in "Password", with: "new password"
+click_button "Sign in"
+expect(page).to have_content("Welcome #{user.name}!! You successfully signed in.")
+
+clear_emails
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<h4>Summary</h4>
+
+<p>As we saw from this example, Capybara has an extremely intuitive set of APIs that makes integration testing simple and even enjoyable (at times). Having automated tests helps guard against <em>regression</em>, a common problem in software development where an application stops functioning as intended after an addition of a new feature. Automated testing can become quite tedious, especially during early stages of application development; however, without it, it is simply impossible to tell whether or not the entire system is bug-free after a new feature is introduced.</p>
+]]></content>
+  </entry>
+  
+</feed>

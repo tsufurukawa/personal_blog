@@ -1,0 +1,443 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Feature Spec With Capybara - Tsubasa Furukawa | Web Developer in Training</title>
+  <meta name="author" content="Tsubasa Furukawa">
+
+  
+  <meta name="description" content="When designing a web application, or any computer software for that matter, having automated tests is absolutely critical. In general, tests can be &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://tsufurukawa-blog.herokuapp.com/blog/2014/08/04/feature-spec-with-capybara">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Tsubasa Furukawa | Web Developer in Training" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Tsubasa Furukawa | Web Developer in Training</a></h1>
+  
+    <h2>Learning Ruby on Rails</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:tsufurukawa-blog.herokuapp.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Feature Spec With Capybara</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-04T21:19:29-07:00" pubdate data-updated="true">Aug 4<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>When designing a web application, or any computer software for that matter, having automated tests is absolutely critical. In general, tests can be broken down into 3 categories:</p>
+
+<p><strong>1. Unit Tests</strong> &ndash; testing different components in isolation <br/>
+<strong>2. Functional Tests</strong> &ndash; testing multiple components in collaboration and making sure individual components work well with each other<br/>
+<strong>3. Integration Tests</strong> &ndash; following a business process and ensuring the components can work together to achieve a business objective</p>
+
+<p>Now, in the context of Rails, these sections can be broken down as:<br/>
+1. Models, Views, Helpers, Routes &ndash;> Unit Tests<br/>
+2. Controllers &ndash;> Functional Tests<br/>
+3. Emulating End User &ldquo;Browser Experience&rdquo; &ndash;> Integration Tests</p>
+
+<p>In this blog post, we&rsquo;ll go through a simple feature spec using  <strong>Capybara</strong> with <strong>RSpec</strong>.</p>
+
+<h4>Basic Setup</h4>
+
+<p>Capybara helps us test web applications by simulating how a real user would interact with our app. It works seamlessly with RSpec, and most importantly, it&rsquo;s got an intuitive API that reads very cleanly. Let&rsquo;s look at an example.</p>
+
+<p>Start off by installing the <code>capybara</code> and <code>capybara-email</code> gems inside your Gemfile.</p>
+
+<figure class='code'><figcaption><span>Ex1: Install Capybara in Gemfile</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">group</span> <span class="ss">:test</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">gem</span> <span class="s1">&#39;capybara&#39;</span>
+</span><span class='line'>  <span class="n">gem</span> <span class="s1">&#39;capybara-email&#39;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Next, inside <code>rails_helper.rb</code>, add these lines of code:</p>
+
+<figure class='code'><figcaption><span>Ex2: Inside Test Helper File</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;capybara/rails&#39;</span>
+</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;capybara/email/rspec&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Lastly, create a file called <code>user_resets_password_spec.rb</code> inside the <code>spec/features</code> directory. We&rsquo;re now ready to start writing out the test!!!</p>
+
+<p>As the name of the file suggests, this particular feature spec mimics the user experience of resetting his/her password. The basic setup of this feature spec is as follows:</p>
+
+<figure class='code'><figcaption><span>Ex3: Setting Up &#8220;Reset Password&#8221; Spec</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;rails_helper&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">feature</span> <span class="s2">&quot;User resets password&quot;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">scenario</span> <span class="s2">&quot;user forgets and resets password successfully&quot;</span> <span class="k">do</span>
+</span><span class='line'>    <span class="c1"># Setup the data</span>
+</span><span class='line'>    <span class="n">user</span> <span class="o">=</span> <span class="no">Fabricate</span><span class="p">(</span><span class="ss">:user</span><span class="p">,</span> <span class="nb">name</span><span class="p">:</span> <span class="s2">&quot;Joe Smith&quot;</span><span class="p">,</span> <span class="ss">email</span><span class="p">:</span> <span class="s2">&quot;test@example.com&quot;</span><span class="p">,</span> <span class="ss">password</span><span class="p">:</span> <span class="s2">&quot;password&quot;</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">clear_email</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Here, we&rsquo;re using an object generation library called <code>Fabrication</code> to generate the <code>user</code> object. The <code>clear_email</code> method is a convenient method given to us by the <code>capybara-email</code> gem, which simply clears the email message queue. (Note: Sending emails is a huge topic in and of itself, but basically whenever emails are sent using ActionMailer, they get stored in a message queue. We must clear this queue to ensure a clean slate and that any extraneous emails are wiped out.)</p>
+
+<h4>Simulating the User Experience</h4>
+
+<p>When a user forgets the password, the first thing he/she will do is to click on the &ldquo;Forgot Password?&rdquo; link. The sign-up for this particular app looks something like this, and the user experience can be mimicked with the following bit of code:</p>
+
+<p><img class="center" src="/images/sign_up_form.png" width="400" height="350" title="'sign_up_form'" ></p>
+
+<figure class='code'><figcaption><span>Ex3: User Clicks on &#8220;Forgot Password&#8221; Link</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">visit</span> <span class="n">sign_in_path</span>
+</span><span class='line'><span class="n">click_link</span> <span class="s2">&quot;Forgot Password?&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Notice how readable this bit of code is!! This is the beauty of working with the Capybara API &ndash; even a non-programmer can read and decipher the code.</p>
+
+<p>Once the user clicks on the link, it will redirect to this page where the user is prompted to enter an email address. Then inside our server side code (specifically inside the <code>ForgotPasswordsController</code>, we send out an email with directions to reset the password if the said email address does indeed exist in our database.</p>
+
+<p><img class="center" src="/images/forgot_password_form.png" width="600" height="260" title="'forgot_password_form'" ></p>
+
+<p>The Capybara code that mimics this user experience is again very straightforward.</p>
+
+<figure class='code'><figcaption><span>Ex4: User Fills out Email Address</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">fill_in</span> <span class="s2">&quot;Email Address&quot;</span><span class="p">,</span> <span class="ss">with</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">email</span>
+</span><span class='line'><span class="n">click_button</span> <span class="s2">&quot;Send Email&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Upon submission of the form, the user will receive an email with a <code>"Reset Password"</code> link. Clicking on this link will redirect the user to the &ldquo;Password Reset&rdquo; page where the user is prompted to enter a new password. This sequence of events is depicted with the following lines of code:</p>
+
+<figure class='code'><figcaption><span>Ex5: User Clicks on &#8220;Reset Password&#8221; Link and Enters New Password</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">open_email</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">email</span><span class="p">)</span>
+</span><span class='line'><span class="n">current_email</span><span class="o">.</span><span class="n">click_link</span> <span class="s2">&quot;Reset Password&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">fill_in</span> <span class="s2">&quot;New Password&quot;</span><span class="p">,</span> <span class="ss">with</span><span class="p">:</span> <span class="s2">&quot;new password&quot;</span>
+</span><span class='line'><span class="n">click_button</span> <span class="s2">&quot;Reset Password&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img class="center" src="/images/reset_password_form.png" width="550" height="260" title="'reset_password_form'" ></p>
+
+<p>The <code>open_email</code> method finds the latest email sent to the specified address (<code>user.email</code>), and sets the <code>current_email</code> so that we can inspect its content.</p>
+
+<p>Finally, the user will fill out the sign-in form with the <code>"new password"</code> to ensure he can successfully log in.</p>
+
+<figure class='code'><figcaption><span>Ex6: User Signs In with New Password</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">fill_in</span> <span class="s2">&quot;Email Address&quot;</span><span class="p">,</span> <span class="ss">with</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">email</span>
+</span><span class='line'><span class="n">fill_in</span> <span class="s2">&quot;Password&quot;</span><span class="p">,</span> <span class="ss">with</span><span class="p">:</span> <span class="s2">&quot;new password&quot;</span>
+</span><span class='line'><span class="n">click_button</span> <span class="s2">&quot;Sign in&quot;</span>
+</span><span class='line'><span class="n">expect</span><span class="p">(</span><span class="n">page</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">have_content</span><span class="p">(</span><span class="s2">&quot;Welcome </span><span class="si">#{</span><span class="n">user</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">!! You successfully signed in.&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="n">clear_emails</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The <code>expect(page).to have_content(...)</code> is an <em>assertion</em>, which is basically a way of verifying the results are what we expected.</p>
+
+<p>The complete spec is as follows:</p>
+
+<figure class='code'><figcaption><span>Ex7: The Complete Feature Spec for Resetting Password</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;rails_helper&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">feature</span> <span class="s2">&quot;User resets password&quot;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">scenario</span> <span class="s2">&quot;user forgets and resets password&quot;</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">user</span> <span class="o">=</span> <span class="no">Fabricate</span><span class="p">(</span><span class="ss">:user</span><span class="p">,</span> <span class="nb">name</span><span class="p">:</span> <span class="s2">&quot;Joe Smith&quot;</span><span class="p">,</span> <span class="ss">email</span><span class="p">:</span> <span class="s2">&quot;test@example.com&quot;</span><span class="p">,</span> <span class="ss">password</span><span class="p">:</span> <span class="s2">&quot;password&quot;</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">clear_emails</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">visit</span> <span class="n">sign_in_path</span>
+</span><span class='line'>    <span class="n">click_link</span> <span class="s2">&quot;Forgot Password?&quot;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">fill_in</span> <span class="s2">&quot;Email Address&quot;</span><span class="p">,</span> <span class="ss">with</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">email</span>
+</span><span class='line'>    <span class="n">click_button</span> <span class="s2">&quot;Send Email&quot;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">open_email</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">email</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">current_email</span><span class="o">.</span><span class="n">click_link</span> <span class="s2">&quot;Reset Password&quot;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">fill_in</span> <span class="s2">&quot;New Password&quot;</span><span class="p">,</span> <span class="ss">with</span><span class="p">:</span> <span class="s2">&quot;new password&quot;</span>
+</span><span class='line'>    <span class="n">click_button</span> <span class="s2">&quot;Reset Password&quot;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">fill_in</span> <span class="s2">&quot;Email Address&quot;</span><span class="p">,</span> <span class="ss">with</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">email</span>
+</span><span class='line'>    <span class="n">fill_in</span> <span class="s2">&quot;Password&quot;</span><span class="p">,</span> <span class="ss">with</span><span class="p">:</span> <span class="s2">&quot;new password&quot;</span>
+</span><span class='line'>    <span class="n">click_button</span> <span class="s2">&quot;Sign in&quot;</span>
+</span><span class='line'>    <span class="n">expect</span><span class="p">(</span><span class="n">page</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">have_content</span><span class="p">(</span><span class="s2">&quot;Welcome </span><span class="si">#{</span><span class="n">user</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">!! You successfully signed in.&quot;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">clear_emails</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>Summary</h4>
+
+<p>As we saw from this example, Capybara has an extremely intuitive set of APIs that makes integration testing simple and even enjoyable (at times). Having automated tests helps guard against <em>regression</em>, a common problem in software development where an application stops functioning as intended after an addition of a new feature. Automated testing can become quite tedious, especially during early stages of application development; however, without it, it is simply impossible to tell whether or not the entire system is bug-free after a new feature is introduced.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Tsubasa Furukawa</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-04T21:19:29-07:00" pubdate data-updated="true">Aug 4<span>th</span>, 2014</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/capybara/'>Capybara</a>, <a class='category' href='/blog/categories/rspec/'>RSpec</a>, <a class='category' href='/blog/categories/rails/'>Rails</a>, <a class='category' href='/blog/categories/testing/'>Testing</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/06/01/rails-flavored-ajax/" title="Previous Post: Rails Flavored Ajax">&laquo; Rails Flavored Ajax</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/08/04/feature-spec-with-capybara/">Feature Spec With Capybara</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/01/rails-flavored-ajax/">Rails Flavored Ajax</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/05/22/authentication-part-part-ii/">Authentication - Part II</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/05/22/authentication/">Authentication - Part I</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/05/13/part-ii-rails-forms/">Rails Forms - Part II</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/tsufurukawa">@tsufurukawa</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'tsufurukawa',
+            count: 5,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Tsubasa Furukawa -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+      <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'tsufurukawa-blog'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+    
+
+
+
+
+
+
+
+
+
+</body>
+</html>
