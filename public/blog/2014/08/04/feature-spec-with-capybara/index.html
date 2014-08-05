@@ -7,6 +7,7 @@
   <meta charset="utf-8">
   <title>Feature Spec With Capybara - Tsubasa Furukawa | Web Developer in Training</title>
   <meta name="author" content="Tsubasa Furukawa">
+  <meta name="google-site-verification" content="E0uq1JJts4soIXsCU-Zxj8dzzHjBpVpuxyZIK_uNpbc" />
 
   
   <meta name="description" content="When designing a web application, or any computer software for that matter, having automated tests is absolutely critical. In general, tests can be &hellip;">
@@ -170,7 +171,7 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>Notice how readable this bit of code is!! This is the beauty of working with the Capybara API &ndash; even a non-programmer can read and decipher the code.</p>
+<p>Notice how readable this code is!! This is the beauty of working with the Capybara API &ndash; even a non-programmer can read and decipher it.</p>
 
 <p>Once the user clicks on the link, it will redirect to this page where the user is prompted to enter an email address. Then inside our server side code (specifically inside the <code>ForgotPasswordsController</code>, we send out an email with directions to reset the password if the said email address does indeed exist in our database.</p>
 
@@ -219,7 +220,7 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>The <code>expect(page).to have_content(...)</code> is an <em>assertion</em>, which is basically a way of verifying the results are what we expected.</p>
+<p>The <code>expect(page).to have_content(...)</code> is an <em>assertion</em>, which is basically a way of verifying if the results are what we expect.</p>
 
 <p>The complete spec is as follows:</p>
 
@@ -282,7 +283,7 @@
 
 <h4>Summary</h4>
 
-<p>As we saw from this example, Capybara has an extremely intuitive set of APIs that makes integration testing simple and even enjoyable (at times). Having automated tests helps guard against <em>regression</em>, a common problem in software development where an application stops functioning as intended after an addition of a new feature. Automated testing can become quite tedious, especially during early stages of application development; however, without it, it is simply impossible to tell whether or not the entire system is bug-free after a new feature is introduced.</p>
+<p>As we saw from this example, Capybara has an extremely intuitive set of APIs that makes integration testing simple and even enjoyable (at times). Having automated tests helps guard against <em>regression</em>, a common problem in software development where an application stops functioning as intended after addition of a new feature. Automated testing can become quite tedious, especially during early stages of application development; however, without it, it is simply impossible to tell whether or not the entire system is bug-free after a new feature is introduced.</p>
 </div>
 
 
@@ -329,6 +330,8 @@
         <a class="basic-alignment left" href="/blog/2014/06/01/rails-flavored-ajax/" title="Previous Post: Rails Flavored Ajax">&laquo; Rails Flavored Ajax</a>
       
       
+        <a class="basic-alignment right" href="/blog/2014/08/05/deployment-pipeline/" title="Next Post: Deployment Pipeline">Deployment Pipeline &raquo;</a>
+      
     </p>
   </footer>
 </article>
@@ -348,6 +351,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/08/05/deployment-pipeline/">Deployment Pipeline</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/08/04/feature-spec-with-capybara/">Feature Spec With Capybara</a>
       </li>
     
@@ -361,10 +368,6 @@
     
       <li class="post">
         <a href="/blog/2014/05/22/authentication/">Authentication - Part I</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/05/13/part-ii-rails-forms/">Rails Forms - Part II</a>
       </li>
     
   </ul>

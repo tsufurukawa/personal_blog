@@ -66,7 +66,7 @@ visit sign_in_path
 click_link "Forgot Password?" 
 ```
 
-Notice how readable this bit of code is!! This is the beauty of working with the Capybara API - even a non-programmer can read and decipher the code.
+Notice how readable this code is!! This is the beauty of working with the Capybara API - even a non-programmer can read and decipher it.
 
 Once the user clicks on the link, it will redirect to this page where the user is prompted to enter an email address. Then inside our server side code (specifically inside the `ForgotPasswordsController`, we send out an email with directions to reset the password if the said email address does indeed exist in our database. 
 
@@ -104,7 +104,7 @@ expect(page).to have_content("Welcome #{user.name}!! You successfully signed in.
 clear_emails
 ```
 
-The `expect(page).to have_content(...)` is an _assertion_, which is basically a way of verifying the results are what we expected.
+The `expect(page).to have_content(...)` is an _assertion_, which is basically a way of verifying if the results are what we expect.
 
 The complete spec is as follows:
 
@@ -139,4 +139,4 @@ end
 ```
 
 ####Summary
-As we saw from this example, Capybara has an extremely intuitive set of APIs that makes integration testing simple and even enjoyable (at times). Having automated tests helps guard against _regression_, a common problem in software development where an application stops functioning as intended after an addition of a new feature. Automated testing can become quite tedious, especially during early stages of application development; however, without it, it is simply impossible to tell whether or not the entire system is bug-free after a new feature is introduced. 
+As we saw from this example, Capybara has an extremely intuitive set of APIs that makes integration testing simple and even enjoyable (at times). Having automated tests helps guard against _regression_, a common problem in software development where an application stops functioning as intended after addition of a new feature. Automated testing can become quite tedious, especially during early stages of application development; however, without it, it is simply impossible to tell whether or not the entire system is bug-free after a new feature is introduced. 

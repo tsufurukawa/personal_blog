@@ -4,7 +4,7 @@
   <title><![CDATA[Category: RSpec | Tsubasa Furukawa | Web Developer in Training]]></title>
   <link href="http://tsufurukawa-blog.herokuapp.com/blog/categories/rspec/atom.xml" rel="self"/>
   <link href="http://tsufurukawa-blog.herokuapp.com/"/>
-  <updated>2014-08-05T09:32:11-07:00</updated>
+  <updated>2014-08-05T11:17:24-07:00</updated>
   <id>http://tsufurukawa-blog.herokuapp.com/</id>
   <author>
     <name><![CDATA[Tsubasa Furukawa]]></name>
@@ -83,7 +83,7 @@ visit sign_in_path
 click_link "Forgot Password?"
 </code></p>
 
-<p>Notice how readable this bit of code is!! This is the beauty of working with the Capybara API &ndash; even a non-programmer can read and decipher the code.</p>
+<p>Notice how readable this code is!! This is the beauty of working with the Capybara API &ndash; even a non-programmer can read and decipher it.</p>
 
 <p>Once the user clicks on the link, it will redirect to this page where the user is prompted to enter an email address. Then inside our server side code (specifically inside the <code>ForgotPasswordsController</code>, we send out an email with directions to reset the password if the said email address does indeed exist in our database.</p>
 
@@ -120,7 +120,7 @@ expect(page).to have_content("Welcome #{user.name}!! You successfully signed in.
 clear_emails
 </code></p>
 
-<p>The <code>expect(page).to have_content(...)</code> is an <em>assertion</em>, which is basically a way of verifying the results are what we expected.</p>
+<p>The <code>expect(page).to have_content(...)</code> is an <em>assertion</em>, which is basically a way of verifying if the results are what we expect.</p>
 
 <p>The complete spec is as follows:</p>
 
@@ -159,7 +159,7 @@ end
 
 <h4>Summary</h4>
 
-<p>As we saw from this example, Capybara has an extremely intuitive set of APIs that makes integration testing simple and even enjoyable (at times). Having automated tests helps guard against <em>regression</em>, a common problem in software development where an application stops functioning as intended after an addition of a new feature. Automated testing can become quite tedious, especially during early stages of application development; however, without it, it is simply impossible to tell whether or not the entire system is bug-free after a new feature is introduced.</p>
+<p>As we saw from this example, Capybara has an extremely intuitive set of APIs that makes integration testing simple and even enjoyable (at times). Having automated tests helps guard against <em>regression</em>, a common problem in software development where an application stops functioning as intended after addition of a new feature. Automated testing can become quite tedious, especially during early stages of application development; however, without it, it is simply impossible to tell whether or not the entire system is bug-free after a new feature is introduced.</p>
 ]]></content>
   </entry>
   
