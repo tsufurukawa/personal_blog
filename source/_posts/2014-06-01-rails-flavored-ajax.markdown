@@ -4,6 +4,8 @@ title: "Rails Flavored Ajax"
 date: 2014-06-01 18:28:07 -0700
 comments: true
 categories: [Rails, Ajax]
+keywords: Ruby on Rails, Tealeaf Academy, Ajax, SJR
+description: Server-Generated Javascript Response (SJR) - How Rails implements Ajax
 ---
 
 ####Unobtrusive Javascript to Handle Ajax

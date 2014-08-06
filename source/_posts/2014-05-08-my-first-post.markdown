@@ -4,6 +4,8 @@ title: "My First Blog Post"
 date: 2014-05-08 01:24:34 -0700
 comments: true
 categories: [Rails]
+keywords: octopress, Ruby on Rails, Tealeaf Academy
+description: About me and starting Tealeaf Academy
 ---
 
 ####A Little About Me

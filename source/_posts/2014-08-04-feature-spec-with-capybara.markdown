@@ -1,9 +1,11 @@
 ---
 layout: post
 title: "Feature Spec with Capybara"
-date: 2014-08-04 21:19:29 -0700
+date: 2014-06-22 21:19:29 -0700
 comments: true
 categories: [RSpec, Capybara, Rails, Testing]
+keywords: Ruby on Rails, Tealeaf Academy, Capybara, RSpec, testing, feature spec
+description: Simple feature spec using Capybara with RSpec
 ---
 
 When designing a web application, or any computer software for that matter, having automated tests is absolutely critical. In general, tests can be broken down into 3 categories:

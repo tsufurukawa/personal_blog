@@ -4,6 +4,8 @@ title: "Authentication - Part I"
 date: 2014-05-22 20:15:01 -0700
 comments: true
 categories: [Rails, Authentication]
+keywords: Ruby on Rails, Tealeaf Academy, authentication
+description: How to implement authentication in Rails using bcrypt-ruby and has_secure_password
 ---
 
 ####How Password Authentication Works

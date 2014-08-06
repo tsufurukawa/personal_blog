@@ -4,6 +4,8 @@ title: "Rails Conventions - Part II"
 date: 2014-05-09 11:38:40 -0700
 comments: true
 categories: [Rails, Rails Convention, Partials]
+keywords: Ruby on Rails, Tealeaf Academy, partials, conventions
+description: Basic Rails conventions and view partials
 ---
 
 In the previous post we saw that we can pass in a file name such as `shared/content_file` into a partial, which will then render the `_content_file.html.erb` file allowing us to create content that is shared among many pages in our application. We can also pass in a local variable such as `title`, containing dynamic data that changes depending on what value we assign to the variable.   

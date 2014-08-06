@@ -4,6 +4,8 @@ title: "Rails Forms - Part I"
 date: 2014-05-13 19:55:35 -0700
 comments: true
 categories: [Rails, Forms]
+keywords: Ruby on Rails, Tealeaf Academy, model-backed forms
+description: 3 Types of Forms - pure HTML, non-model backed forms, model-backed forms
 ---
 
 In general, there are 3 ways to create and handle forms in Rails: pure html, form helpers, and model-backed form helpers. 

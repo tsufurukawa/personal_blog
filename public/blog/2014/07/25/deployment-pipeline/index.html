@@ -1,0 +1,388 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Deployment Pipeline - Tsubasa Furukawa | Web Developer in Training</title>
+  <meta name="author" content="Tsubasa Furukawa">
+  <meta name="google-site-verification" content="E0uq1JJts4soIXsCU-Zxj8dzzHjBpVpuxyZIK_uNpbc" />
+
+  
+  <meta name="description" content="Setting up simple deployment pipeline using paratrooper gem and a staging server">
+  <meta name="keywords" content="Ruby on Rails, Tealeaf Academy, deployment pipeline, paratrooper, heroku, staging">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://tsufurukawa-blog.herokuapp.com/blog/2014/07/25/deployment-pipeline">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Tsubasa Furukawa | Web Developer in Training" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-53538139-1']);
+    _gaq.push(['_setDomainName', 'herokuapp.com'])
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Tsubasa Furukawa | Web Developer in Training</a></h1>
+  
+    <h2>Learning Ruby on Rails at Tealeaf Academy</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:tsufurukawa-blog.herokuapp.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Deployment Pipeline</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-25T09:40:40-07:00" pubdate data-updated="true">Jul 25<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h4>Background</h4>
+
+<p><em>Deployment pipeline</em> is the process of breaking up automated deployment steps to ensure bugs are detected and broken features are addressed before an application is set to production. A web application typically runs on three environments: <em>development environment</em> running on a developer&rsquo;s local machine, <em>test environment</em> for running tests, and <em>production environment</em> where real users interact with the application. The underlying problem with this setup is that there&rsquo;s no guarantee that code that works flawlessly in local development environment will work the same when deployed to production. That is, development and production environments are inherently different with different configurations, so deploying straight to production from development is a risky process.</p>
+
+<p>The solution is to have a <em>staging environment</em> that mimics the production environment as closely as possible. Essentially, we want to create a platform where we can check our code in a &ldquo;production-like&rdquo; setting so that any new feature can be thoroughly tested and bugs can be accounted for before having it affect our actual users. Imagine deploying thought-to-be-working code to production and later discovering broken features in the application &ndash; you&rsquo;ll more than likely have to shut down the site, thereby disrupting the end user experience. A staging environment can guard against such catastrophe.</p>
+
+<h4>Deployment Pipeline at Tealeaf Academy</h4>
+
+<p>Deployment pipelines can become very complex, especially for larger projects. For the application we are currently working on at Tealeaf, we adopted a simple but effective deployment pipeline that can be summarized as follows:</p>
+
+<ol>
+<li>Follow the Github Flow process &ndash; after you complete a feature on a branch, merge the pull request back to the master branch.</li>
+<li>Run entire test suite &ndash; &ldquo;don&rsquo;t break the build.&rdquo;</li>
+<li>Deploy code to staging &ndash; test on staging server manually to ensure that the new feature works.</li>
+<li>Deploy code to production &ndash; remember the staging server should be as close to the production server as possible.</li>
+</ol>
+
+
+<h4>Setting Up the Deployment Pipeline</h4>
+
+<p>Now, we&rsquo;ll walk through how to set up the deployment pipeline with multiple environments on Heroku. We will follow <a href="https://devcenter.heroku.com/articles/multiple-environments">this</a> Heroku tutorial to first set up the staging environment, and then use the <a href="https://github.com/mattpolito/paratrooper">paratrooper gem</a> to simplify the deployment process with quick/concise rake tasks.</p>
+
+<h6>1. Fork an Existing Application</h6>
+
+<p>Let&rsquo;s assume we already have an existing application running in production, in which case, we can duplicate the staging application via <em>forking</em>.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>heroku fork -a production_app_name staging_app_name
+</span><span class='line'>git remote add staging git@heroku.com:staging_app_name.git</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The great thing about forking an application is that it copies over the config vars, re-provisions all add-ons, and copies all Heroku Postgres data too, so that you don&rsquo;t have to do these manually. In the second line, we are adding a new <code>staging</code> remote repository.</p>
+
+<h6>2. Simplify Heroku Deploy with Paratrooper Gem</h6>
+
+<p>The <em>Paratrooper</em> gem allows us to write a set of rake tasks that can simplify the deployment process.</p>
+
+<p>First, add this line to the Gemfile:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s1">&#39;paratrooper&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Although we can customize the method however we want, the Paratrooper wiki provides a &ldquo;Sensible Default Deployment&rdquo; code:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;paratrooper&#39;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">namespace</span> <span class="ss">:deploy</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">desc</span> <span class="s1">&#39;Deploy app in staging environment&#39;</span>
+</span><span class='line'>    <span class="n">task</span> <span class="ss">:staging</span> <span class="k">do</span>
+</span><span class='line'>      <span class="n">deployment</span> <span class="o">=</span> <span class="ss">Paratrooper</span><span class="p">:</span><span class="ss">:Deploy</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;staging_app_name&quot;</span><span class="p">,</span> <span class="ss">tag</span><span class="p">:</span> <span class="s1">&#39;staging&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="n">deployment</span><span class="o">.</span><span class="n">deploy</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">desc</span> <span class="s1">&#39;Deploy app in production environment&#39;</span>
+</span><span class='line'>    <span class="n">task</span> <span class="ss">:production</span> <span class="k">do</span>
+</span><span class='line'>      <span class="n">deployment</span> <span class="o">=</span> <span class="ss">Paratrooper</span><span class="p">:</span><span class="ss">:Deploy</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;production_app_name&quot;</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">deploy</span><span class="o">|</span>
+</span><span class='line'>        <span class="n">deploy</span><span class="o">.</span><span class="n">tag</span>              <span class="o">=</span> <span class="s1">&#39;production&#39;</span>
+</span><span class='line'>        <span class="n">deploy</span><span class="o">.</span><span class="n">match_tag</span>        <span class="o">=</span> <span class="s1">&#39;staging&#39;</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="n">deployment</span><span class="o">.</span><span class="n">deploy</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The above code is a rake task &ndash; put it under <strong>lib/tasks</strong> directory <strong>deploy.rake</strong> and tweak it a little so that it uses our own Heroku app names &ndash; and performs the following tasks:</p>
+
+<ul>
+<li>Create or update a git tag (if provided)</li>
+<li>Push changes to Heroku</li>
+<li>Run database migrations if any have been added to db/migrate</li>
+<li>Restart the application</li>
+<li>Warm application instance</li>
+</ul>
+
+
+<p>Essentially Paratrooper takes all the steps necessary for deployment and wraps them a single rake command &ndash; <code>rake deploy:staging</code> to deploy to staging, and <code>rake deploy:production</code> to deploy to production.</p>
+
+<h6>3. Modify Config Vars on Heroku and Create Staging Config File</h6>
+
+<p>Notice now that if you inspect the <code>RAILS_ENV</code> and <code>RACK_ENV</code> environment variables for our staging app, they both say &ldquo;production&rdquo;. Thus by default it will load the configuration file under <strong>config/environments/production.rb</strong>. This may be okay if the production and staging servers have identical configurations; however, typically we should create a <strong>staging.rb</strong> file, in which we specify the exact settings we want for the staging environment (such as turning on asset pipeline or not, sending out email or not, or charging credit card for real or not, etc).</p>
+
+<p>We can modify the environment variables as follows:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">heroku</span> <span class="ss">config</span><span class="p">:</span><span class="n">set</span> <span class="no">RAILS_ENV</span><span class="o">=</span><span class="n">staging</span> <span class="o">--</span><span class="n">remote</span> <span class="n">staging</span>
+</span><span class='line'><span class="n">heroku</span> <span class="ss">config</span><span class="p">:</span><span class="n">set</span> <span class="no">RACK_ENV</span><span class="o">=</span><span class="n">staging</span> <span class="o">--</span><span class="n">remote</span> <span class="n">staging</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<p>Now, whenever we deploy to staging, Heroku will run the staging configuration file (<strong>staging.rb</strong>).</p>
+
+<h4>Summary</h4>
+
+<p>In this post, we talked about the importance of having a staging server and how to set up a simple deployment pipeline. Again it is very important for the <strong>staging server to be as close to the production server as possible</strong>, or else it defeats the whole point of having a staging server.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Tsubasa Furukawa</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-25T09:40:40-07:00" pubdate data-updated="true">Jul 25<span>th</span>, 2014</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/deployment-pipeline/'>Deployment Pipeline</a>, <a class='category' href='/blog/categories/heroku/'>Heroku</a>, <a class='category' href='/blog/categories/rails/'>Rails</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/06/22/feature-spec-with-capybara/" title="Previous Post: Feature Spec with Capybara">&laquo; Feature Spec with Capybara</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/07/25/deployment-pipeline/">Deployment Pipeline</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/22/feature-spec-with-capybara/">Feature Spec With Capybara</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/06/01/rails-flavored-ajax/">Rails Flavored Ajax</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/05/22/authentication-part-part-ii/">Authentication - Part II</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/05/22/authentication/">Authentication - Part I</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/tsufurukawa">@tsufurukawa</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'tsufurukawa',
+            count: 5,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Tsubasa Furukawa -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+      <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'tsufurukawa-blog'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+    
+
+
+
+
+
+
+
+
+
+</body>
+</html>

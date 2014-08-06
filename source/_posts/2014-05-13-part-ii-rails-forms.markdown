@@ -4,6 +4,8 @@ title: "Rails Forms - Part II"
 date: 2014-05-13 22:41:29 -0700
 comments: true
 categories: [Rails, Forms, Strong Parameters, Validation]
+keywords: Ruby on Rails, Tealeaf Academy, strong parameters, validations
+description: How to handle form submissions in Rails using validations and strong parameters
 ---
 
 In the last post, we discussed how to generate forms, how the parameters are stored inside a `params` hash, and where the form is submitted to. In this post, we talk about how to handle the form submission using validations and strong parameters. 

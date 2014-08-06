@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Rails | Tsubasa Furukawa | Web Developer in Training]]></title>
   <link href="http://tsufurukawa-blog.herokuapp.com/blog/categories/rails/atom.xml" rel="self"/>
   <link href="http://tsufurukawa-blog.herokuapp.com/"/>
-  <updated>2014-08-05T11:38:58-07:00</updated>
+  <updated>2014-08-05T17:44:42-07:00</updated>
   <id>http://tsufurukawa-blog.herokuapp.com/</id>
   <author>
     <name><![CDATA[Tsubasa Furukawa]]></name>
@@ -15,18 +15,117 @@
   
   <entry>
     <title type="html"><![CDATA[Deployment Pipeline]]></title>
-    <link href="http://tsufurukawa-blog.herokuapp.com/blog/2014/08/05/deployment-pipeline/"/>
-    <updated>2014-08-05T09:40:40-07:00</updated>
-    <id>http://tsufurukawa-blog.herokuapp.com/blog/2014/08/05/deployment-pipeline</id>
-    <content type="html"><![CDATA[
+    <link href="http://tsufurukawa-blog.herokuapp.com/blog/2014/07/25/deployment-pipeline/"/>
+    <updated>2014-07-25T09:40:40-07:00</updated>
+    <id>http://tsufurukawa-blog.herokuapp.com/blog/2014/07/25/deployment-pipeline</id>
+    <content type="html"><![CDATA[<h4>Background</h4>
+
+<p><em>Deployment pipeline</em> is the process of breaking up automated deployment steps to ensure bugs are detected and broken features are addressed before an application is set to production. A web application typically runs on three environments: <em>development environment</em> running on a developer&rsquo;s local machine, <em>test environment</em> for running tests, and <em>production environment</em> where real users interact with the application. The underlying problem with this setup is that there&rsquo;s no guarantee that code that works flawlessly in local development environment will work the same when deployed to production. That is, development and production environments are inherently different with different configurations, so deploying straight to production from development is a risky process.</p>
+
+<p>The solution is to have a <em>staging environment</em> that mimics the production environment as closely as possible. Essentially, we want to create a platform where we can check our code in a &ldquo;production-like&rdquo; setting so that any new feature can be thoroughly tested and bugs can be accounted for before having it affect our actual users. Imagine deploying thought-to-be-working code to production and later discovering broken features in the application &ndash; you&rsquo;ll more than likely have to shut down the site, thereby disrupting the end user experience. A staging environment can guard against such catastrophe.</p>
+
+<h4>Deployment Pipeline at Tealeaf Academy</h4>
+
+<p>Deployment pipelines can become very complex, especially for larger projects. For the application we are currently working on at Tealeaf, we adopted a simple but effective deployment pipeline that can be summarized as follows:</p>
+
+<ol>
+<li>Follow the Github Flow process &ndash; after you complete a feature on a branch, merge the pull request back to the master branch.</li>
+<li>Run entire test suite &ndash; &ldquo;don&rsquo;t break the build.&rdquo;</li>
+<li>Deploy code to staging &ndash; test on staging server manually to ensure that the new feature works.</li>
+<li>Deploy code to production &ndash; remember the staging server should be as close to the production server as possible.</li>
+</ol>
+
+
+<h4>Setting Up the Deployment Pipeline</h4>
+
+<p>Now, we&rsquo;ll walk through how to set up the deployment pipeline with multiple environments on Heroku. We will follow <a href="https://devcenter.heroku.com/articles/multiple-environments">this</a> Heroku tutorial to first set up the staging environment, and then use the <a href="https://github.com/mattpolito/paratrooper">paratrooper gem</a> to simplify the deployment process with quick/concise rake tasks.</p>
+
+<h6>1. Fork an Existing Application</h6>
+
+<p>Let&rsquo;s assume we already have an existing application running in production, in which case, we can duplicate the staging application via <em>forking</em>.</p>
+
+<p><code>
+heroku fork -a production_app_name staging_app_name
+git remote add staging git@heroku.com:staging_app_name.git
+</code></p>
+
+<p>The great thing about forking an application is that it copies over the config vars, re-provisions all add-ons, and copies all Heroku Postgres data too, so that you don&rsquo;t have to do these manually. In the second line, we are adding a new <code>staging</code> remote repository.</p>
+
+<h6>2. Simplify Heroku Deploy with Paratrooper Gem</h6>
+
+<p>The <em>Paratrooper</em> gem allows us to write a set of rake tasks that can simplify the deployment process.</p>
+
+<p>First, add this line to the Gemfile:</p>
+
+<p><code>ruby
+gem 'paratrooper'
+</code></p>
+
+<p>Although we can customize the method however we want, the Paratrooper wiki provides a &ldquo;Sensible Default Deployment&rdquo; code:</p>
+
+<p>```ruby
+require &lsquo;paratrooper&rsquo;</p>
+
+<p>  namespace :deploy do</p>
+
+<pre><code>desc 'Deploy app in staging environment'
+task :staging do
+  deployment = Paratrooper::Deploy.new("staging_app_name", tag: 'staging')
+
+  deployment.deploy
+end
+
+desc 'Deploy app in production environment'
+task :production do
+  deployment = Paratrooper::Deploy.new("production_app_name") do |deploy|
+    deploy.tag              = 'production'
+    deploy.match_tag        = 'staging'
+  end
+
+  deployment.deploy
+end
+</code></pre>
+
+<p>  end
+```</p>
+
+<p>The above code is a rake task &ndash; put it under <strong>lib/tasks</strong> directory <strong>deploy.rake</strong> and tweak it a little so that it uses our own Heroku app names &ndash; and performs the following tasks:</p>
+
+<ul>
+<li>Create or update a git tag (if provided)</li>
+<li>Push changes to Heroku</li>
+<li>Run database migrations if any have been added to db/migrate</li>
+<li>Restart the application</li>
+<li>Warm application instance</li>
+</ul>
+
+
+<p>Essentially Paratrooper takes all the steps necessary for deployment and wraps them a single rake command &ndash; <code>rake deploy:staging</code> to deploy to staging, and <code>rake deploy:production</code> to deploy to production.</p>
+
+<h6>3. Modify Config Vars on Heroku and Create Staging Config File</h6>
+
+<p>Notice now that if you inspect the <code>RAILS_ENV</code> and <code>RACK_ENV</code> environment variables for our staging app, they both say &ldquo;production&rdquo;. Thus by default it will load the configuration file under <strong>config/environments/production.rb</strong>. This may be okay if the production and staging servers have identical configurations; however, typically we should create a <strong>staging.rb</strong> file, in which we specify the exact settings we want for the staging environment (such as turning on asset pipeline or not, sending out email or not, or charging credit card for real or not, etc).</p>
+
+<p>We can modify the environment variables as follows:</p>
+
+<p><code>
+heroku config:set RAILS_ENV=staging --remote staging
+heroku config:set RACK_ENV=staging --remote staging
+</code></p>
+
+<p>Now, whenever we deploy to staging, Heroku will run the staging configuration file (<strong>staging.rb</strong>).</p>
+
+<h4>Summary</h4>
+
+<p>In this post, we talked about the importance of having a staging server and how to set up a simple deployment pipeline. Again it is very important for the <strong>staging server to be as close to the production server as possible</strong>, or else it defeats the whole point of having a staging server.</p>
 ]]></content>
   </entry>
   
   <entry>
     <title type="html"><![CDATA[Feature Spec With Capybara]]></title>
-    <link href="http://tsufurukawa-blog.herokuapp.com/blog/2014/08/04/feature-spec-with-capybara/"/>
-    <updated>2014-08-04T21:19:29-07:00</updated>
-    <id>http://tsufurukawa-blog.herokuapp.com/blog/2014/08/04/feature-spec-with-capybara</id>
+    <link href="http://tsufurukawa-blog.herokuapp.com/blog/2014/06/22/feature-spec-with-capybara/"/>
+    <updated>2014-06-22T21:19:29-07:00</updated>
+    <id>http://tsufurukawa-blog.herokuapp.com/blog/2014/06/22/feature-spec-with-capybara</id>
     <content type="html"><![CDATA[<p>When designing a web application, or any computer software for that matter, having automated tests is absolutely critical. In general, tests can be broken down into 3 categories:</p>
 
 <p><strong>1. Unit Tests</strong> &ndash; testing different components in isolation <br/>

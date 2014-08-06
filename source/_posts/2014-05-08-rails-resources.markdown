@@ -4,6 +4,8 @@ title: "Rails Conventions - Part I"
 date: 2014-05-08 22:33:15 -0700
 comments: true
 categories: [Rails, Rails Convention, Partials]
+keywords: Ruby on Rails, Tealeaf Academy, partials, conventions
+description: Basic Rails conventions and view partials
 ---
 
 ####Some Basic Rails Conventions
