@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Testing | Tsubasa Furukawa | Web Developer in Training]]></title>
   <link href="http://tsufurukawa-blog.herokuapp.com/blog/categories/testing/atom.xml" rel="self"/>
   <link href="http://tsufurukawa-blog.herokuapp.com/"/>
-  <updated>2014-08-05T17:44:42-07:00</updated>
+  <updated>2014-08-05T20:15:44-07:00</updated>
   <id>http://tsufurukawa-blog.herokuapp.com/</id>
   <author>
     <name><![CDATA[Tsubasa Furukawa]]></name>
@@ -20,9 +20,9 @@
     <id>http://tsufurukawa-blog.herokuapp.com/blog/2014/06/22/feature-spec-with-capybara</id>
     <content type="html"><![CDATA[<p>When designing a web application, or any computer software for that matter, having automated tests is absolutely critical. In general, tests can be broken down into 3 categories:</p>
 
-<p><strong>1. Unit Tests</strong> &ndash; testing different components in isolation <br/>
-<strong>2. Functional Tests</strong> &ndash; testing multiple components in collaboration and making sure individual components work well with each other<br/>
-<strong>3. Integration Tests</strong> &ndash; following a business process and ensuring the components can work together to achieve a business objective</p>
+<p><strong>1. Unit Tests</strong> &ndash; testing different components in isolation. <br/>
+<strong>2. Functional Tests</strong> &ndash; testing multiple components in collaboration and making sure individual components work well with each other.<br/>
+<strong>3. Integration Tests</strong> &ndash; following a business process and ensuring the components can work together to achieve a business objective.</p>
 
 <p>Now, in the context of Rails, these sections can be broken down as:<br/>
 1. Models, Views, Helpers, Routes &ndash;> Unit Tests<br/>
@@ -83,9 +83,9 @@ visit sign_in_path
 click_link "Forgot Password?"
 </code></p>
 
-<p>Notice how readable this code is!! This is the beauty of working with the Capybara API &ndash; even a non-programmer can read and decipher it.</p>
+<p>Notice how readable this code is!! This is the beauty of working with the Capybara API &ndash; even a non-programmer can read and decipher the code.</p>
 
-<p>Once the user clicks on the link, it will redirect to this page where the user is prompted to enter an email address. Then inside our server side code (specifically inside the <code>ForgotPasswordsController</code>, we send out an email with directions to reset the password if the said email address does indeed exist in our database.</p>
+<p>Once the user clicks on the link, it will redirect to a page where the user is prompted to enter an email address. Then inside our server side code (specifically, inside the <code>ForgotPasswordsController</code>, we send out an email with directions to reset the password if the said email address does indeed exist in our database.</p>
 
 <p><img class="center" src="/images/forgot_password_form.png" width="600" height="260" title="&lsquo;forgot_password_form&rsquo;" ></p>
 

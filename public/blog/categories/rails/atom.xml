@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Rails | Tsubasa Furukawa | Web Developer in Training]]></title>
   <link href="http://tsufurukawa-blog.herokuapp.com/blog/categories/rails/atom.xml" rel="self"/>
   <link href="http://tsufurukawa-blog.herokuapp.com/"/>
-  <updated>2014-08-05T17:44:42-07:00</updated>
+  <updated>2014-08-05T20:15:44-07:00</updated>
   <id>http://tsufurukawa-blog.herokuapp.com/</id>
   <author>
     <name><![CDATA[Tsubasa Furukawa]]></name>
@@ -14,15 +14,106 @@
 
   
   <entry>
+    <title type="html"><![CDATA[Action Mailer and Intercepting Emails]]></title>
+    <link href="http://tsufurukawa-blog.herokuapp.com/blog/2014/07/26/intercepting-emails/"/>
+    <updated>2014-07-26T17:55:37-07:00</updated>
+    <id>http://tsufurukawa-blog.herokuapp.com/blog/2014/07/26/intercepting-emails</id>
+    <content type="html"><![CDATA[<p>In the previous post, we discussed how to set up a staging environment that mimics the production environment. One of the few configuration differences that we&rsquo;ll want to address is the way in which we handle email submission. For example, say we have an application that sends out a welcome email after a user signs up for an account. Of course in production, we want the email to flow straight to the user&rsquo;s inbox; however in staging, we want to prevent spamming our users and instead want the test emails to flow to a designated user &ndash; say an admin. Fortunately in Rails, Action Mailer provides hooks to intercept every mail, which then allows us to make modifications to messages right before they are handed to the delivery agents.</p>
+
+<h4>Email Sending with Action Mailer</h4>
+
+<p>Going back to the example described above, we send out a welcome email after a user registers. The method that accomplishes this is defined inside <strong>app/mailers/app_mailer.rb</strong>:</p>
+
+<p>```ruby Ex1: Welcome Email Method
+class AppMailer &lt; ActionMailer::Base
+  def send_welcome_email(user)</p>
+
+<pre><code>@user = user
+mail from: 'info@app.com', to: user.email, subject: "Welcome to this Awesome App!!"
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>Note that this method does not actually send out the email &ndash; it simply returns a <code>Mail::Message</code> object which can then be delivered by calling the <code>deliver</code> method. This process is shown inside the <code>UsersController#create</code> action where a new user object is created and an email is sent to the said user.</p>
+
+<p>```ruby Ex2: Sending Email Upon Registration
+def create
+  @user = User.new(params.requie(:user).permit(:name, :email, :password))
+  if @user.save</p>
+
+<pre><code>AppMailer.send_welcome_email(@user).deliver
+flash[:success] = "Welcome!! You've successfully registered!!."
+redirect_to home_path
+</code></pre>
+
+<p>  else</p>
+
+<pre><code>render :new
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>Now if we use a third party email service provider such as <a href="http://www.mailgun.com/">Mailgun</a>, the configuration inside <strong>config/environments/staging.rb</strong> and <strong>config/environments/production.rb</strong> will look something like:</p>
+
+<p><code>ruby Ex3: Email Sending Configuraiton for Staging and Production
+ActionMailer::Base.smtp_settings = {
+  :port           =&gt; ENV['MAILGUN_SMTP_PORT'],
+  :address        =&gt; ENV['MAILGUN_SMTP_SERVER'],
+  :user_name      =&gt; ENV['MAILGUN_SMTP_LOGIN'],
+  :password       =&gt; ENV['MAILGUN_SMTP_PASSWORD'],
+  :domain         =&gt; 'my_app.herokuapp.com',
+  :authentication =&gt; :plain,
+}
+ActionMailer::Base.delivery_method = :smtp
+</code></p>
+
+<p>Now if we deploy our app, the emails will be delivered to the user&rsquo;s inbox. The problem however remains &ndash; for staging, we want the email to be delivered to a default user (i.e. the admin) instead of to the newly registered user.</p>
+
+<h4>Intercepting Emails</h4>
+
+<p>The implementation is actually rather simple. First, we create an <em>interceptor</em>, which allows us to edit an email before it&rsquo;s delivered. The file is called <strong>staging_email_interceptor.rb</strong> and should be placed under the <strong>lib</strong> directory.</p>
+
+<p>```ruby Ex4: Staging Email Interceptor
+class StagingEmailInterceptor
+  def self.delivering_email(message)</p>
+
+<pre><code>message.to = ENV["STAGING_EMAIL_RECIPIENT"]
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p><code>delivering_email</code> is a class method that gets triggered right before the email is sent, and <code>message</code> refers to the <code>Mail::Message</code> instance that is returned from the <code>send_welcome_email</code> method we defined previously. So essentially after <code>send_welcome_email</code> is called, the message object gets sent to <code>delivering_email</code> where the <code>to</code> parameter is overriden to the <code>STAGING_EMAIL_RECIPIENT</code>, which is an environment variable pointing at the admin&rsquo;s email address to where all staging emails will be filtered.</p>
+
+<p>Lastly, we need to register the interceptor with the Action Mailer framework. We can do this in an initializer file <strong>config/initializers/register_email_interceptor.rb</strong>.</p>
+
+<p><code>ruby Ex5: Register the Interceptor
+ActionMailer::Base.register_interceptor(StagingEmailInterceptor) if Rails.env.staging?
+</code></p>
+
+<p>The conditional at the end is important because we only want the inteceptor to get triggered if the <code>RAILS_ENV</code> environment variable is set to <code>staging</code>. Thus, in <code>production</code> the interception will be bypassed and the email will be sent to the registered user&rsquo;s address.</p>
+
+<h4>Summary</h4>
+
+<p>In this post, we discussed how to send an email using the Action Mailer framework. Then we used interceptors to filter all test emails in staging to the admin user&rsquo;s inbox.</p>
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[Deployment Pipeline]]></title>
     <link href="http://tsufurukawa-blog.herokuapp.com/blog/2014/07/25/deployment-pipeline/"/>
     <updated>2014-07-25T09:40:40-07:00</updated>
     <id>http://tsufurukawa-blog.herokuapp.com/blog/2014/07/25/deployment-pipeline</id>
     <content type="html"><![CDATA[<h4>Background</h4>
 
-<p><em>Deployment pipeline</em> is the process of breaking up automated deployment steps to ensure bugs are detected and broken features are addressed before an application is set to production. A web application typically runs on three environments: <em>development environment</em> running on a developer&rsquo;s local machine, <em>test environment</em> for running tests, and <em>production environment</em> where real users interact with the application. The underlying problem with this setup is that there&rsquo;s no guarantee that code that works flawlessly in local development environment will work the same when deployed to production. That is, development and production environments are inherently different with different configurations, so deploying straight to production from development is a risky process.</p>
+<p><em>Deployment pipeline</em> is the process of breaking up automated deployment steps to ensure bugs are detected and broken features are addressed before an application is set to production. A web application typically runs on three environments: <em>development environment</em> running on a developer&rsquo;s local machine, <em>test environment</em> for running tests, and <em>production environment</em> where real users interact with the application. The underlying problem with this setup is that there&rsquo;s no guarantee code that works flawlessly in local development environment will work the same when deployed to production. That is, development and production environments are inherently different with different configurations, so deploying straight to production from development is a risky process.</p>
 
-<p>The solution is to have a <em>staging environment</em> that mimics the production environment as closely as possible. Essentially, we want to create a platform where we can check our code in a &ldquo;production-like&rdquo; setting so that any new feature can be thoroughly tested and bugs can be accounted for before having it affect our actual users. Imagine deploying thought-to-be-working code to production and later discovering broken features in the application &ndash; you&rsquo;ll more than likely have to shut down the site, thereby disrupting the end user experience. A staging environment can guard against such catastrophe.</p>
+<p>The solution is to have a <em>staging environment</em> that <strong>mimics the production environment</strong> as closely as possible. Essentially, we want to create a platform where we can check our code in a production-like setting so that any new feature can be thoroughly tested and bugs can be accounted for before having it affect our actual users. Imagine deploying thought-to-be-working code to production and later discovering broken features in the application &ndash; you&rsquo;ll likely have to shut down the site, thereby disrupting the end user experience. A staging environment can guard against such catastrophe.</p>
 
 <h4>Deployment Pipeline at Tealeaf Academy</h4>
 
@@ -30,7 +121,7 @@
 
 <ol>
 <li>Follow the Github Flow process &ndash; after you complete a feature on a branch, merge the pull request back to the master branch.</li>
-<li>Run entire test suite &ndash; &ldquo;don&rsquo;t break the build.&rdquo;</li>
+<li>Run entire test suite &ndash; <em>don&rsquo;t break the build</em>.</li>
 <li>Deploy code to staging &ndash; test on staging server manually to ensure that the new feature works.</li>
 <li>Deploy code to production &ndash; remember the staging server should be as close to the production server as possible.</li>
 </ol>
@@ -38,7 +129,7 @@
 
 <h4>Setting Up the Deployment Pipeline</h4>
 
-<p>Now, we&rsquo;ll walk through how to set up the deployment pipeline with multiple environments on Heroku. We will follow <a href="https://devcenter.heroku.com/articles/multiple-environments">this</a> Heroku tutorial to first set up the staging environment, and then use the <a href="https://github.com/mattpolito/paratrooper">paratrooper gem</a> to simplify the deployment process with quick/concise rake tasks.</p>
+<p>Now, we&rsquo;ll walk through how to set up the deployment pipeline with multiple environments on Heroku. We will follow this <a href="https://devcenter.heroku.com/articles/multiple-environments">Heroku tutorial</a> to first set up the staging environment, and then use the <a href="https://github.com/mattpolito/paratrooper">paratrooper gem</a> to simplify the deployment process with quick/concise rake tasks.</p>
 
 <h6>1. Fork an Existing Application</h6>
 
@@ -49,7 +140,7 @@ heroku fork -a production_app_name staging_app_name
 git remote add staging git@heroku.com:staging_app_name.git
 </code></p>
 
-<p>The great thing about forking an application is that it copies over the config vars, re-provisions all add-ons, and copies all Heroku Postgres data too, so that you don&rsquo;t have to do these manually. In the second line, we are adding a new <code>staging</code> remote repository.</p>
+<p>The great thing about forking an application is that it copies over the config vars, re-provisions all add-ons, and copies all Heroku Postgres data too, so that we don&rsquo;t have to do these manually. In the second line, we are adding a new <code>staging</code> remote repository.</p>
 
 <h6>2. Simplify Heroku Deploy with Paratrooper Gem</h6>
 
@@ -61,7 +152,7 @@ git remote add staging git@heroku.com:staging_app_name.git
 gem 'paratrooper'
 </code></p>
 
-<p>Although we can customize the method however we want, the Paratrooper wiki provides a &ldquo;Sensible Default Deployment&rdquo; code:</p>
+<p>Although we can customize the method however we want, the Paratrooper wiki provides a <em>Sensible Default Deployment</em> code:</p>
 
 <p>```ruby
 require &lsquo;paratrooper&rsquo;</p>
@@ -100,11 +191,11 @@ end
 </ul>
 
 
-<p>Essentially Paratrooper takes all the steps necessary for deployment and wraps them a single rake command &ndash; <code>rake deploy:staging</code> to deploy to staging, and <code>rake deploy:production</code> to deploy to production.</p>
+<p>Essentially Paratrooper takes all the steps necessary for deployment and wraps them in a single rake command &ndash; <code>rake deploy:staging</code> to deploy to staging, and <code>rake deploy:production</code> to deploy to production.</p>
 
 <h6>3. Modify Config Vars on Heroku and Create Staging Config File</h6>
 
-<p>Notice now that if you inspect the <code>RAILS_ENV</code> and <code>RACK_ENV</code> environment variables for our staging app, they both say &ldquo;production&rdquo;. Thus by default it will load the configuration file under <strong>config/environments/production.rb</strong>. This may be okay if the production and staging servers have identical configurations; however, typically we should create a <strong>staging.rb</strong> file, in which we specify the exact settings we want for the staging environment (such as turning on asset pipeline or not, sending out email or not, or charging credit card for real or not, etc).</p>
+<p>Notice now that if you inspect the <code>RAILS_ENV</code> and <code>RACK_ENV</code> environment variables for our staging app, they both say &ldquo;production&rdquo;. Thus by default it will load the configuration file under <strong>config/environments/production.rb</strong>. This may be okay if the production and staging servers have identical configurations; however, typically we should create a separate <strong>staging.rb</strong> file, in which we specify the exact settings we want for the staging environment (such as turning on asset pipeline or not, sending out email or not, or charging credit card for real or not, etc).</p>
 
 <p>We can modify the environment variables as follows:</p>
 
@@ -128,9 +219,9 @@ heroku config:set RACK_ENV=staging --remote staging
     <id>http://tsufurukawa-blog.herokuapp.com/blog/2014/06/22/feature-spec-with-capybara</id>
     <content type="html"><![CDATA[<p>When designing a web application, or any computer software for that matter, having automated tests is absolutely critical. In general, tests can be broken down into 3 categories:</p>
 
-<p><strong>1. Unit Tests</strong> &ndash; testing different components in isolation <br/>
-<strong>2. Functional Tests</strong> &ndash; testing multiple components in collaboration and making sure individual components work well with each other<br/>
-<strong>3. Integration Tests</strong> &ndash; following a business process and ensuring the components can work together to achieve a business objective</p>
+<p><strong>1. Unit Tests</strong> &ndash; testing different components in isolation. <br/>
+<strong>2. Functional Tests</strong> &ndash; testing multiple components in collaboration and making sure individual components work well with each other.<br/>
+<strong>3. Integration Tests</strong> &ndash; following a business process and ensuring the components can work together to achieve a business objective.</p>
 
 <p>Now, in the context of Rails, these sections can be broken down as:<br/>
 1. Models, Views, Helpers, Routes &ndash;> Unit Tests<br/>
@@ -191,9 +282,9 @@ visit sign_in_path
 click_link "Forgot Password?"
 </code></p>
 
-<p>Notice how readable this code is!! This is the beauty of working with the Capybara API &ndash; even a non-programmer can read and decipher it.</p>
+<p>Notice how readable this code is!! This is the beauty of working with the Capybara API &ndash; even a non-programmer can read and decipher the code.</p>
 
-<p>Once the user clicks on the link, it will redirect to this page where the user is prompted to enter an email address. Then inside our server side code (specifically inside the <code>ForgotPasswordsController</code>, we send out an email with directions to reset the password if the said email address does indeed exist in our database.</p>
+<p>Once the user clicks on the link, it will redirect to a page where the user is prompted to enter an email address. Then inside our server side code (specifically, inside the <code>ForgotPasswordsController</code>, we send out an email with directions to reset the password if the said email address does indeed exist in our database.</p>
 
 <p><img class="center" src="/images/forgot_password_form.png" width="600" height="260" title="&lsquo;forgot_password_form&rsquo;" ></p>
 
@@ -493,64 +584,6 @@ end
 <h4>Summary</h4>
 
 <p>In this post, we walked through the authentication system from scratch. We introduced the session to keep track of which user is logged in, and using this information, we were able to suppress certain features that should be unaccessible to unauthenticated users.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Authentication - Part I]]></title>
-    <link href="http://tsufurukawa-blog.herokuapp.com/blog/2014/05/22/authentication/"/>
-    <updated>2014-05-22T20:15:01-07:00</updated>
-    <id>http://tsufurukawa-blog.herokuapp.com/blog/2014/05/22/authentication</id>
-    <content type="html"><![CDATA[<h4>How Password Authentication Works</h4>
-
-<p>The theory behind how authentication works in Rails is pretty straightforward. We save passwords through a <em>1-way hash</em>, meaning that we hash some string (ie. when user first registers) into a long undecipherable hash token. We then perform authentication, not by decrypting this hash token, but rather by hashing another string (ie. when user logs in) and then checking if the two hashes match.</p>
-
-<p>It&rsquo;s important that we never store the actual password string (like &ldquo;password&rdquo;) in our database &ndash; we instead want to store a string representation of the password in the form of an undecipherable token. This is also called a <em>1-way hash digest</em>. When we authenticate, we compare the two digests, NOT the actual password string. In fact since the hashes are &ldquo;1-way&rdquo;, we cannot convert the digest back into the password string.</p>
-
-<h4>How to Implement Authentication in Rails</h4>
-
-<h6>1. Create <code>password_digest</code> Column in Database</h6>
-
-<p>First, we need a column to keep track of the long token. This column must be called <code>password_digest</code>.</p>
-
-<p><img class="left" src="/images/password_digest.png" width="350" height="350" title="&lsquo;users_table&rsquo;" ></p>
-
-<p>This figure shows how a <code>users</code> table may be represented inside of a database. The <code>password_digest</code> attribute stores the long token or digest. The way we generate this token is through a gem called <code>bcrypt-ruby</code>, which uses a complicated hashing algorithm to convert a chunk of data (eg. your user&rsquo;s password) into an undecipherable string. Because this process is not reversible it&rsquo;s impossible to go from the hash back to the password.</p>
-
-<h6>2. <code>has_secure_password</code> in Model</h6>
-
-<p>At the model layer, we use the <code>has_secure_password</code> method to save the passwords in our database. <code>has_secure_password</code> uses the bcrypt gem to generate the one way hash.</p>
-
-<p><code>ruby User Model with has_secure_password
-class User &lt; ActiveRecord::Base
-  has_secure_password validations: false
-  validates :password, presence: true, on: :create, length: { minimum: 5 }
-end
-</code></p>
-
-<p><code>has_secure_password</code> has built in validations, which may or may not be useful. In the code above, we remove the default validations by delcaring <code>validations: false</code>. We then declare our own validations manually (although this step is not necessary, it&rsquo;s recommended because it gives us better control of which validations to include and allows us to be more explicit in specifying the validations).</p>
-
-<h6>3. Authenticate Using <code>.password</code> and <code>.authenticate</code></h6>
-
-<p><code>has_secure_password</code> gives us a couple methods that allow us to complete the authentication process. The first is a <code>.password</code> virtual attribute setter method. By calling <code>.password</code> on a <code>user</code> object, <code>bcrypt</code> automatically hashes the password string, which is then stored under the <code>password_digest</code> column. It&rsquo;s noteworthy that there is no getter method for <code>.password</code>, which makes intuitive sense because the original password strings are unrecoverable.</p>
-
-<p>The second method that <code>has_secure_password</code> give us is <code>.authenticate</code>. This method is similar to <code>.password</code> in that we pass in a string which automatically gets converted into a hash token. <code>.authenticate</code> will compare the submitted digest with the stored digest in our database. If the hash tokens match, it&rsquo;ll return the user object which evaluates to true; otherwise, it&rsquo;ll return false.</p>
-
-<p>The following code shows these steps in action:</p>
-
-<p>```ruby
-u = User.new(&lsquo;bob&rsquo;)
-u.password = &lsquo;password&rsquo; # using the &lsquo;.password&rsquo; setter method &ndash; sets &lsquo;password_digest&rsquo;
-u.save # saves user object in database</p>
-
-<p>user = User.find_by(username: &lsquo;bob&rsquo;) # looks for a &lsquo;bob&rsquo; user object from database
-user.authenticate(&lsquo;some password&rsquo;) # returns false because the hash digests do not match
-user.authenticate(&lsquo;password&rsquo;) # returns the &lsquo;bob&rsquo; user object because the hash digests do match
-```</p>
-
-<h4>Summary</h4>
-
-<p>In this post, we talked about the theory of authentication and how Rails implements them in the database and model layers. In the next post, we&rsquo;ll use a practical example to see how this all comes together.</p>
 ]]></content>
   </entry>
   

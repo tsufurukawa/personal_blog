@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Email | Tsubasa Furukawa | Web Developer in Training]]></title>
+  <link href="http://tsufurukawa-blog.herokuapp.com/blog/categories/email/atom.xml" rel="self"/>
+  <link href="http://tsufurukawa-blog.herokuapp.com/"/>
+  <updated>2014-08-05T20:15:44-07:00</updated>
+  <id>http://tsufurukawa-blog.herokuapp.com/</id>
+  <author>
+    <name><![CDATA[Tsubasa Furukawa]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Action Mailer and Intercepting Emails]]></title>
+    <link href="http://tsufurukawa-blog.herokuapp.com/blog/2014/07/26/intercepting-emails/"/>
+    <updated>2014-07-26T17:55:37-07:00</updated>
+    <id>http://tsufurukawa-blog.herokuapp.com/blog/2014/07/26/intercepting-emails</id>
+    <content type="html"><![CDATA[<p>In the previous post, we discussed how to set up a staging environment that mimics the production environment. One of the few configuration differences that we&rsquo;ll want to address is the way in which we handle email submission. For example, say we have an application that sends out a welcome email after a user signs up for an account. Of course in production, we want the email to flow straight to the user&rsquo;s inbox; however in staging, we want to prevent spamming our users and instead want the test emails to flow to a designated user &ndash; say an admin. Fortunately in Rails, Action Mailer provides hooks to intercept every mail, which then allows us to make modifications to messages right before they are handed to the delivery agents.</p>
+
+<h4>Email Sending with Action Mailer</h4>
+
+<p>Going back to the example described above, we send out a welcome email after a user registers. The method that accomplishes this is defined inside <strong>app/mailers/app_mailer.rb</strong>:</p>
+
+<p>```ruby Ex1: Welcome Email Method
+class AppMailer &lt; ActionMailer::Base
+  def send_welcome_email(user)</p>
+
+<pre><code>@user = user
+mail from: 'info@app.com', to: user.email, subject: "Welcome to this Awesome App!!"
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>Note that this method does not actually send out the email &ndash; it simply returns a <code>Mail::Message</code> object which can then be delivered by calling the <code>deliver</code> method. This process is shown inside the <code>UsersController#create</code> action where a new user object is created and an email is sent to the said user.</p>
+
+<p>```ruby Ex2: Sending Email Upon Registration
+def create
+  @user = User.new(params.requie(:user).permit(:name, :email, :password))
+  if @user.save</p>
+
+<pre><code>AppMailer.send_welcome_email(@user).deliver
+flash[:success] = "Welcome!! You've successfully registered!!."
+redirect_to home_path
+</code></pre>
+
+<p>  else</p>
+
+<pre><code>render :new
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>Now if we use a third party email service provider such as <a href="http://www.mailgun.com/">Mailgun</a>, the configuration inside <strong>config/environments/staging.rb</strong> and <strong>config/environments/production.rb</strong> will look something like:</p>
+
+<p><code>ruby Ex3: Email Sending Configuraiton for Staging and Production
+ActionMailer::Base.smtp_settings = {
+  :port           =&gt; ENV['MAILGUN_SMTP_PORT'],
+  :address        =&gt; ENV['MAILGUN_SMTP_SERVER'],
+  :user_name      =&gt; ENV['MAILGUN_SMTP_LOGIN'],
+  :password       =&gt; ENV['MAILGUN_SMTP_PASSWORD'],
+  :domain         =&gt; 'my_app.herokuapp.com',
+  :authentication =&gt; :plain,
+}
+ActionMailer::Base.delivery_method = :smtp
+</code></p>
+
+<p>Now if we deploy our app, the emails will be delivered to the user&rsquo;s inbox. The problem however remains &ndash; for staging, we want the email to be delivered to a default user (i.e. the admin) instead of to the newly registered user.</p>
+
+<h4>Intercepting Emails</h4>
+
+<p>The implementation is actually rather simple. First, we create an <em>interceptor</em>, which allows us to edit an email before it&rsquo;s delivered. The file is called <strong>staging_email_interceptor.rb</strong> and should be placed under the <strong>lib</strong> directory.</p>
+
+<p>```ruby Ex4: Staging Email Interceptor
+class StagingEmailInterceptor
+  def self.delivering_email(message)</p>
+
+<pre><code>message.to = ENV["STAGING_EMAIL_RECIPIENT"]
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p><code>delivering_email</code> is a class method that gets triggered right before the email is sent, and <code>message</code> refers to the <code>Mail::Message</code> instance that is returned from the <code>send_welcome_email</code> method we defined previously. So essentially after <code>send_welcome_email</code> is called, the message object gets sent to <code>delivering_email</code> where the <code>to</code> parameter is overriden to the <code>STAGING_EMAIL_RECIPIENT</code>, which is an environment variable pointing at the admin&rsquo;s email address to where all staging emails will be filtered.</p>
+
+<p>Lastly, we need to register the interceptor with the Action Mailer framework. We can do this in an initializer file <strong>config/initializers/register_email_interceptor.rb</strong>.</p>
+
+<p><code>ruby Ex5: Register the Interceptor
+ActionMailer::Base.register_interceptor(StagingEmailInterceptor) if Rails.env.staging?
+</code></p>
+
+<p>The conditional at the end is important because we only want the inteceptor to get triggered if the <code>RAILS_ENV</code> environment variable is set to <code>staging</code>. Thus, in <code>production</code> the interception will be bypassed and the email will be sent to the registered user&rsquo;s address.</p>
+
+<h4>Summary</h4>
+
+<p>In this post, we discussed how to send an email using the Action Mailer framework. Then we used interceptors to filter all test emails in staging to the admin user&rsquo;s inbox.</p>
+]]></content>
+  </entry>
+  
+</feed>

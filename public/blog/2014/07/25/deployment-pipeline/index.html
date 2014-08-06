@@ -107,9 +107,9 @@
 
 <div class="entry-content"><h4>Background</h4>
 
-<p><em>Deployment pipeline</em> is the process of breaking up automated deployment steps to ensure bugs are detected and broken features are addressed before an application is set to production. A web application typically runs on three environments: <em>development environment</em> running on a developer&rsquo;s local machine, <em>test environment</em> for running tests, and <em>production environment</em> where real users interact with the application. The underlying problem with this setup is that there&rsquo;s no guarantee that code that works flawlessly in local development environment will work the same when deployed to production. That is, development and production environments are inherently different with different configurations, so deploying straight to production from development is a risky process.</p>
+<p><em>Deployment pipeline</em> is the process of breaking up automated deployment steps to ensure bugs are detected and broken features are addressed before an application is set to production. A web application typically runs on three environments: <em>development environment</em> running on a developer&rsquo;s local machine, <em>test environment</em> for running tests, and <em>production environment</em> where real users interact with the application. The underlying problem with this setup is that there&rsquo;s no guarantee code that works flawlessly in local development environment will work the same when deployed to production. That is, development and production environments are inherently different with different configurations, so deploying straight to production from development is a risky process.</p>
 
-<p>The solution is to have a <em>staging environment</em> that mimics the production environment as closely as possible. Essentially, we want to create a platform where we can check our code in a &ldquo;production-like&rdquo; setting so that any new feature can be thoroughly tested and bugs can be accounted for before having it affect our actual users. Imagine deploying thought-to-be-working code to production and later discovering broken features in the application &ndash; you&rsquo;ll more than likely have to shut down the site, thereby disrupting the end user experience. A staging environment can guard against such catastrophe.</p>
+<p>The solution is to have a <em>staging environment</em> that <strong>mimics the production environment</strong> as closely as possible. Essentially, we want to create a platform where we can check our code in a production-like setting so that any new feature can be thoroughly tested and bugs can be accounted for before having it affect our actual users. Imagine deploying thought-to-be-working code to production and later discovering broken features in the application &ndash; you&rsquo;ll likely have to shut down the site, thereby disrupting the end user experience. A staging environment can guard against such catastrophe.</p>
 
 <h4>Deployment Pipeline at Tealeaf Academy</h4>
 
@@ -117,7 +117,7 @@
 
 <ol>
 <li>Follow the Github Flow process &ndash; after you complete a feature on a branch, merge the pull request back to the master branch.</li>
-<li>Run entire test suite &ndash; &ldquo;don&rsquo;t break the build.&rdquo;</li>
+<li>Run entire test suite &ndash; <em>don&rsquo;t break the build</em>.</li>
 <li>Deploy code to staging &ndash; test on staging server manually to ensure that the new feature works.</li>
 <li>Deploy code to production &ndash; remember the staging server should be as close to the production server as possible.</li>
 </ol>
@@ -125,7 +125,7 @@
 
 <h4>Setting Up the Deployment Pipeline</h4>
 
-<p>Now, we&rsquo;ll walk through how to set up the deployment pipeline with multiple environments on Heroku. We will follow <a href="https://devcenter.heroku.com/articles/multiple-environments">this</a> Heroku tutorial to first set up the staging environment, and then use the <a href="https://github.com/mattpolito/paratrooper">paratrooper gem</a> to simplify the deployment process with quick/concise rake tasks.</p>
+<p>Now, we&rsquo;ll walk through how to set up the deployment pipeline with multiple environments on Heroku. We will follow this <a href="https://devcenter.heroku.com/articles/multiple-environments">Heroku tutorial</a> to first set up the staging environment, and then use the <a href="https://github.com/mattpolito/paratrooper">paratrooper gem</a> to simplify the deployment process with quick/concise rake tasks.</p>
 
 <h6>1. Fork an Existing Application</h6>
 
@@ -137,7 +137,7 @@
 </span><span class='line'>git remote add staging git@heroku.com:staging_app_name.git</span></code></pre></td></tr></table></div></figure>
 
 
-<p>The great thing about forking an application is that it copies over the config vars, re-provisions all add-ons, and copies all Heroku Postgres data too, so that you don&rsquo;t have to do these manually. In the second line, we are adding a new <code>staging</code> remote repository.</p>
+<p>The great thing about forking an application is that it copies over the config vars, re-provisions all add-ons, and copies all Heroku Postgres data too, so that we don&rsquo;t have to do these manually. In the second line, we are adding a new <code>staging</code> remote repository.</p>
 
 <h6>2. Simplify Heroku Deploy with Paratrooper Gem</h6>
 
@@ -150,7 +150,7 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>Although we can customize the method however we want, the Paratrooper wiki provides a &ldquo;Sensible Default Deployment&rdquo; code:</p>
+<p>Although we can customize the method however we want, the Paratrooper wiki provides a <em>Sensible Default Deployment</em> code:</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -206,11 +206,11 @@
 </ul>
 
 
-<p>Essentially Paratrooper takes all the steps necessary for deployment and wraps them a single rake command &ndash; <code>rake deploy:staging</code> to deploy to staging, and <code>rake deploy:production</code> to deploy to production.</p>
+<p>Essentially Paratrooper takes all the steps necessary for deployment and wraps them in a single rake command &ndash; <code>rake deploy:staging</code> to deploy to staging, and <code>rake deploy:production</code> to deploy to production.</p>
 
 <h6>3. Modify Config Vars on Heroku and Create Staging Config File</h6>
 
-<p>Notice now that if you inspect the <code>RAILS_ENV</code> and <code>RACK_ENV</code> environment variables for our staging app, they both say &ldquo;production&rdquo;. Thus by default it will load the configuration file under <strong>config/environments/production.rb</strong>. This may be okay if the production and staging servers have identical configurations; however, typically we should create a <strong>staging.rb</strong> file, in which we specify the exact settings we want for the staging environment (such as turning on asset pipeline or not, sending out email or not, or charging credit card for real or not, etc).</p>
+<p>Notice now that if you inspect the <code>RAILS_ENV</code> and <code>RACK_ENV</code> environment variables for our staging app, they both say &ldquo;production&rdquo;. Thus by default it will load the configuration file under <strong>config/environments/production.rb</strong>. This may be okay if the production and staging servers have identical configurations; however, typically we should create a separate <strong>staging.rb</strong> file, in which we specify the exact settings we want for the staging environment (such as turning on asset pipeline or not, sending out email or not, or charging credit card for real or not, etc).</p>
 
 <p>We can modify the environment variables as follows:</p>
 
@@ -274,6 +274,8 @@
         <a class="basic-alignment left" href="/blog/2014/06/22/feature-spec-with-capybara/" title="Previous Post: Feature Spec with Capybara">&laquo; Feature Spec with Capybara</a>
       
       
+        <a class="basic-alignment right" href="/blog/2014/07/26/intercepting-emails/" title="Next Post: Action Mailer and Intercepting Emails">Action Mailer and Intercepting Emails &raquo;</a>
+      
     </p>
   </footer>
 </article>
@@ -293,6 +295,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/07/26/intercepting-emails/">Action Mailer and Intercepting Emails</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/07/25/deployment-pipeline/">Deployment Pipeline</a>
       </li>
     
@@ -306,10 +312,6 @@
     
       <li class="post">
         <a href="/blog/2014/05/22/authentication-part-part-ii/">Authentication - Part II</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/05/22/authentication/">Authentication - Part I</a>
       </li>
     
   </ul>

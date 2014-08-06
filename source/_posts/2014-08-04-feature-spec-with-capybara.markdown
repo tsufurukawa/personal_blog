@@ -10,9 +10,9 @@ description: Simple feature spec using Capybara with RSpec
 
 When designing a web application, or any computer software for that matter, having automated tests is absolutely critical. In general, tests can be broken down into 3 categories:
 
-__1. Unit Tests__ - testing different components in isolation   
-__2. Functional Tests__ - testing multiple components in collaboration and making sure individual components work well with each other  
-__3. Integration Tests__ - following a business process and ensuring the components can work together to achieve a business objective
+__1. Unit Tests__ - testing different components in isolation.   
+__2. Functional Tests__ - testing multiple components in collaboration and making sure individual components work well with each other.  
+__3. Integration Tests__ - following a business process and ensuring the components can work together to achieve a business objective.
 
 Now, in the context of Rails, these sections can be broken down as:  
 1. Models, Views, Helpers, Routes -> Unit Tests  
@@ -68,9 +68,9 @@ visit sign_in_path
 click_link "Forgot Password?" 
 ```
 
-Notice how readable this code is!! This is the beauty of working with the Capybara API - even a non-programmer can read and decipher it.
+Notice how readable this code is!! This is the beauty of working with the Capybara API - even a non-programmer can read and decipher the code.
 
-Once the user clicks on the link, it will redirect to this page where the user is prompted to enter an email address. Then inside our server side code (specifically inside the `ForgotPasswordsController`, we send out an email with directions to reset the password if the said email address does indeed exist in our database. 
+Once the user clicks on the link, it will redirect to a page where the user is prompted to enter an email address. Then inside our server side code (specifically, inside the `ForgotPasswordsController`, we send out an email with directions to reset the password if the said email address does indeed exist in our database. 
 
 {% img center /images/forgot_password_form.png 600 260 'forgot_password_form' %}
 

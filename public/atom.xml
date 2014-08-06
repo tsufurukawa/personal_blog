@@ -4,7 +4,7 @@
   <title><![CDATA[Tsubasa Furukawa | Web Developer in Training]]></title>
   <link href="http://tsufurukawa-blog.herokuapp.com/atom.xml" rel="self"/>
   <link href="http://tsufurukawa-blog.herokuapp.com/"/>
-  <updated>2014-08-05T17:44:42-07:00</updated>
+  <updated>2014-08-05T20:15:44-07:00</updated>
   <id>http://tsufurukawa-blog.herokuapp.com/</id>
   <author>
     <name><![CDATA[Tsubasa Furukawa]]></name>
@@ -14,15 +14,125 @@
 
   
   <entry>
+    <title type="html"><![CDATA[Action Mailer and Intercepting Emails]]></title>
+    <link href="http://tsufurukawa-blog.herokuapp.com/blog/2014/07/26/intercepting-emails/"/>
+    <updated>2014-07-26T17:55:37-07:00</updated>
+    <id>http://tsufurukawa-blog.herokuapp.com/blog/2014/07/26/intercepting-emails</id>
+    <content type="html"><![CDATA[<p>In the previous post, we discussed how to set up a staging environment that mimics the production environment. One of the few configuration differences that we&rsquo;ll want to address is the way in which we handle email submission. For example, say we have an application that sends out a welcome email after a user signs up for an account. Of course in production, we want the email to flow straight to the user&rsquo;s inbox; however in staging, we want to prevent spamming our users and instead want the test emails to flow to a designated user &ndash; say an admin. Fortunately in Rails, Action Mailer provides hooks to intercept every mail, which then allows us to make modifications to messages right before they are handed to the delivery agents.</p>
+
+<h4>Email Sending with Action Mailer</h4>
+
+<p>Going back to the example described above, we send out a welcome email after a user registers. The method that accomplishes this is defined inside <strong>app/mailers/app_mailer.rb</strong>:</p>
+
+<figure class='code'><figcaption><span>Ex1: Welcome Email Method</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">AppMailer</span> <span class="o">&lt;</span> <span class="ss">ActionMailer</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">send_welcome_email</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@user</span> <span class="o">=</span> <span class="n">user</span>
+</span><span class='line'>    <span class="n">mail</span> <span class="ss">from</span><span class="p">:</span> <span class="s1">&#39;info@app.com&#39;</span><span class="p">,</span> <span class="ss">to</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">email</span><span class="p">,</span> <span class="ss">subject</span><span class="p">:</span> <span class="s2">&quot;Welcome to this Awesome App!!&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Note that this method does not actually send out the email &ndash; it simply returns a <code>Mail::Message</code> object which can then be delivered by calling the <code>deliver</code> method. This process is shown inside the <code>UsersController#create</code> action where a new user object is created and an email is sent to the said user.</p>
+
+<figure class='code'><figcaption><span>Ex2: Sending Email Upon Registration</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">create</span>
+</span><span class='line'>  <span class="vi">@user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">requie</span><span class="p">(</span><span class="ss">:user</span><span class="p">)</span><span class="o">.</span><span class="n">permit</span><span class="p">(</span><span class="ss">:name</span><span class="p">,</span> <span class="ss">:email</span><span class="p">,</span> <span class="ss">:password</span><span class="p">))</span>
+</span><span class='line'>  <span class="k">if</span> <span class="vi">@user</span><span class="o">.</span><span class="n">save</span>
+</span><span class='line'>    <span class="no">AppMailer</span><span class="o">.</span><span class="n">send_welcome_email</span><span class="p">(</span><span class="vi">@user</span><span class="p">)</span><span class="o">.</span><span class="n">deliver</span>
+</span><span class='line'>    <span class="n">flash</span><span class="o">[</span><span class="ss">:success</span><span class="o">]</span> <span class="o">=</span> <span class="s2">&quot;Welcome!! You&#39;ve successfully registered!!.&quot;</span>
+</span><span class='line'>    <span class="n">redirect_to</span> <span class="n">home_path</span>
+</span><span class='line'>  <span class="k">else</span>
+</span><span class='line'>    <span class="n">render</span> <span class="ss">:new</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now if we use a third party email service provider such as <a href="http://www.mailgun.com/">Mailgun</a>, the configuration inside <strong>config/environments/staging.rb</strong> and <strong>config/environments/production.rb</strong> will look something like:</p>
+
+<figure class='code'><figcaption><span>Ex3: Email Sending Configuraiton for Staging and Production</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="ss">ActionMailer</span><span class="p">:</span><span class="ss">:Base</span><span class="o">.</span><span class="n">smtp_settings</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>  <span class="ss">:port</span>           <span class="o">=&gt;</span> <span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;MAILGUN_SMTP_PORT&#39;</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'>  <span class="ss">:address</span>        <span class="o">=&gt;</span> <span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;MAILGUN_SMTP_SERVER&#39;</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'>  <span class="ss">:user_name</span>      <span class="o">=&gt;</span> <span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;MAILGUN_SMTP_LOGIN&#39;</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'>  <span class="ss">:password</span>       <span class="o">=&gt;</span> <span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;MAILGUN_SMTP_PASSWORD&#39;</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'>  <span class="ss">:domain</span>         <span class="o">=&gt;</span> <span class="s1">&#39;my_app.herokuapp.com&#39;</span><span class="p">,</span>
+</span><span class='line'>  <span class="ss">:authentication</span> <span class="o">=&gt;</span> <span class="ss">:plain</span><span class="p">,</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="ss">ActionMailer</span><span class="p">:</span><span class="ss">:Base</span><span class="o">.</span><span class="n">delivery_method</span> <span class="o">=</span> <span class="ss">:smtp</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now if we deploy our app, the emails will be delivered to the user&rsquo;s inbox. The problem however remains &ndash; for staging, we want the email to be delivered to a default user (i.e. the admin) instead of to the newly registered user.</p>
+
+<h4>Intercepting Emails</h4>
+
+<p>The implementation is actually rather simple. First, we create an <em>interceptor</em>, which allows us to edit an email before it&rsquo;s delivered. The file is called <strong>staging_email_interceptor.rb</strong> and should be placed under the <strong>lib</strong> directory.</p>
+
+<figure class='code'><figcaption><span>Ex4: Staging Email Interceptor</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">StagingEmailInterceptor</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">delivering_email</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">message</span><span class="o">.</span><span class="n">to</span> <span class="o">=</span> <span class="no">ENV</span><span class="o">[</span><span class="s2">&quot;STAGING_EMAIL_RECIPIENT&quot;</span><span class="o">]</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>delivering_email</code> is a class method that gets triggered right before the email is sent, and <code>message</code> refers to the <code>Mail::Message</code> instance that is returned from the <code>send_welcome_email</code> method we defined previously. So essentially after <code>send_welcome_email</code> is called, the message object gets sent to <code>delivering_email</code> where the <code>to</code> parameter is overriden to the <code>STAGING_EMAIL_RECIPIENT</code>, which is an environment variable pointing at the admin&rsquo;s email address to where all staging emails will be filtered.</p>
+
+<p>Lastly, we need to register the interceptor with the Action Mailer framework. We can do this in an initializer file <strong>config/initializers/register_email_interceptor.rb</strong>.</p>
+
+<figure class='code'><figcaption><span>Ex5: Register the Interceptor</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="ss">ActionMailer</span><span class="p">:</span><span class="ss">:Base</span><span class="o">.</span><span class="n">register_interceptor</span><span class="p">(</span><span class="no">StagingEmailInterceptor</span><span class="p">)</span> <span class="k">if</span> <span class="no">Rails</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">staging?</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The conditional at the end is important because we only want the inteceptor to get triggered if the <code>RAILS_ENV</code> environment variable is set to <code>staging</code>. Thus, in <code>production</code> the interception will be bypassed and the email will be sent to the registered user&rsquo;s address.</p>
+
+<h4>Summary</h4>
+
+<p>In this post, we discussed how to send an email using the Action Mailer framework. Then we used interceptors to filter all test emails in staging to the admin user&rsquo;s inbox.</p>
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[Deployment Pipeline]]></title>
     <link href="http://tsufurukawa-blog.herokuapp.com/blog/2014/07/25/deployment-pipeline/"/>
     <updated>2014-07-25T09:40:40-07:00</updated>
     <id>http://tsufurukawa-blog.herokuapp.com/blog/2014/07/25/deployment-pipeline</id>
     <content type="html"><![CDATA[<h4>Background</h4>
 
-<p><em>Deployment pipeline</em> is the process of breaking up automated deployment steps to ensure bugs are detected and broken features are addressed before an application is set to production. A web application typically runs on three environments: <em>development environment</em> running on a developer&rsquo;s local machine, <em>test environment</em> for running tests, and <em>production environment</em> where real users interact with the application. The underlying problem with this setup is that there&rsquo;s no guarantee that code that works flawlessly in local development environment will work the same when deployed to production. That is, development and production environments are inherently different with different configurations, so deploying straight to production from development is a risky process.</p>
+<p><em>Deployment pipeline</em> is the process of breaking up automated deployment steps to ensure bugs are detected and broken features are addressed before an application is set to production. A web application typically runs on three environments: <em>development environment</em> running on a developer&rsquo;s local machine, <em>test environment</em> for running tests, and <em>production environment</em> where real users interact with the application. The underlying problem with this setup is that there&rsquo;s no guarantee code that works flawlessly in local development environment will work the same when deployed to production. That is, development and production environments are inherently different with different configurations, so deploying straight to production from development is a risky process.</p>
 
-<p>The solution is to have a <em>staging environment</em> that mimics the production environment as closely as possible. Essentially, we want to create a platform where we can check our code in a &ldquo;production-like&rdquo; setting so that any new feature can be thoroughly tested and bugs can be accounted for before having it affect our actual users. Imagine deploying thought-to-be-working code to production and later discovering broken features in the application &ndash; you&rsquo;ll more than likely have to shut down the site, thereby disrupting the end user experience. A staging environment can guard against such catastrophe.</p>
+<p>The solution is to have a <em>staging environment</em> that <strong>mimics the production environment</strong> as closely as possible. Essentially, we want to create a platform where we can check our code in a production-like setting so that any new feature can be thoroughly tested and bugs can be accounted for before having it affect our actual users. Imagine deploying thought-to-be-working code to production and later discovering broken features in the application &ndash; you&rsquo;ll likely have to shut down the site, thereby disrupting the end user experience. A staging environment can guard against such catastrophe.</p>
 
 <h4>Deployment Pipeline at Tealeaf Academy</h4>
 
@@ -30,7 +140,7 @@
 
 <ol>
 <li>Follow the Github Flow process &ndash; after you complete a feature on a branch, merge the pull request back to the master branch.</li>
-<li>Run entire test suite &ndash; &ldquo;don&rsquo;t break the build.&rdquo;</li>
+<li>Run entire test suite &ndash; <em>don&rsquo;t break the build</em>.</li>
 <li>Deploy code to staging &ndash; test on staging server manually to ensure that the new feature works.</li>
 <li>Deploy code to production &ndash; remember the staging server should be as close to the production server as possible.</li>
 </ol>
@@ -38,7 +148,7 @@
 
 <h4>Setting Up the Deployment Pipeline</h4>
 
-<p>Now, we&rsquo;ll walk through how to set up the deployment pipeline with multiple environments on Heroku. We will follow <a href="https://devcenter.heroku.com/articles/multiple-environments">this</a> Heroku tutorial to first set up the staging environment, and then use the <a href="https://github.com/mattpolito/paratrooper">paratrooper gem</a> to simplify the deployment process with quick/concise rake tasks.</p>
+<p>Now, we&rsquo;ll walk through how to set up the deployment pipeline with multiple environments on Heroku. We will follow this <a href="https://devcenter.heroku.com/articles/multiple-environments">Heroku tutorial</a> to first set up the staging environment, and then use the <a href="https://github.com/mattpolito/paratrooper">paratrooper gem</a> to simplify the deployment process with quick/concise rake tasks.</p>
 
 <h6>1. Fork an Existing Application</h6>
 
@@ -50,7 +160,7 @@
 </span><span class='line'>git remote add staging git@heroku.com:staging_app_name.git</span></code></pre></td></tr></table></div></figure>
 
 
-<p>The great thing about forking an application is that it copies over the config vars, re-provisions all add-ons, and copies all Heroku Postgres data too, so that you don&rsquo;t have to do these manually. In the second line, we are adding a new <code>staging</code> remote repository.</p>
+<p>The great thing about forking an application is that it copies over the config vars, re-provisions all add-ons, and copies all Heroku Postgres data too, so that we don&rsquo;t have to do these manually. In the second line, we are adding a new <code>staging</code> remote repository.</p>
 
 <h6>2. Simplify Heroku Deploy with Paratrooper Gem</h6>
 
@@ -63,7 +173,7 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>Although we can customize the method however we want, the Paratrooper wiki provides a &ldquo;Sensible Default Deployment&rdquo; code:</p>
+<p>Although we can customize the method however we want, the Paratrooper wiki provides a <em>Sensible Default Deployment</em> code:</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -119,11 +229,11 @@
 </ul>
 
 
-<p>Essentially Paratrooper takes all the steps necessary for deployment and wraps them a single rake command &ndash; <code>rake deploy:staging</code> to deploy to staging, and <code>rake deploy:production</code> to deploy to production.</p>
+<p>Essentially Paratrooper takes all the steps necessary for deployment and wraps them in a single rake command &ndash; <code>rake deploy:staging</code> to deploy to staging, and <code>rake deploy:production</code> to deploy to production.</p>
 
 <h6>3. Modify Config Vars on Heroku and Create Staging Config File</h6>
 
-<p>Notice now that if you inspect the <code>RAILS_ENV</code> and <code>RACK_ENV</code> environment variables for our staging app, they both say &ldquo;production&rdquo;. Thus by default it will load the configuration file under <strong>config/environments/production.rb</strong>. This may be okay if the production and staging servers have identical configurations; however, typically we should create a <strong>staging.rb</strong> file, in which we specify the exact settings we want for the staging environment (such as turning on asset pipeline or not, sending out email or not, or charging credit card for real or not, etc).</p>
+<p>Notice now that if you inspect the <code>RAILS_ENV</code> and <code>RACK_ENV</code> environment variables for our staging app, they both say &ldquo;production&rdquo;. Thus by default it will load the configuration file under <strong>config/environments/production.rb</strong>. This may be okay if the production and staging servers have identical configurations; however, typically we should create a separate <strong>staging.rb</strong> file, in which we specify the exact settings we want for the staging environment (such as turning on asset pipeline or not, sending out email or not, or charging credit card for real or not, etc).</p>
 
 <p>We can modify the environment variables as follows:</p>
 
@@ -151,9 +261,9 @@
     <id>http://tsufurukawa-blog.herokuapp.com/blog/2014/06/22/feature-spec-with-capybara</id>
     <content type="html"><![CDATA[<p>When designing a web application, or any computer software for that matter, having automated tests is absolutely critical. In general, tests can be broken down into 3 categories:</p>
 
-<p><strong>1. Unit Tests</strong> &ndash; testing different components in isolation <br/>
-<strong>2. Functional Tests</strong> &ndash; testing multiple components in collaboration and making sure individual components work well with each other<br/>
-<strong>3. Integration Tests</strong> &ndash; following a business process and ensuring the components can work together to achieve a business objective</p>
+<p><strong>1. Unit Tests</strong> &ndash; testing different components in isolation. <br/>
+<strong>2. Functional Tests</strong> &ndash; testing multiple components in collaboration and making sure individual components work well with each other.<br/>
+<strong>3. Integration Tests</strong> &ndash; following a business process and ensuring the components can work together to achieve a business objective.</p>
 
 <p>Now, in the context of Rails, these sections can be broken down as:<br/>
 1. Models, Views, Helpers, Routes &ndash;> Unit Tests<br/>
@@ -228,9 +338,9 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>Notice how readable this code is!! This is the beauty of working with the Capybara API &ndash; even a non-programmer can read and decipher it.</p>
+<p>Notice how readable this code is!! This is the beauty of working with the Capybara API &ndash; even a non-programmer can read and decipher the code.</p>
 
-<p>Once the user clicks on the link, it will redirect to this page where the user is prompted to enter an email address. Then inside our server side code (specifically inside the <code>ForgotPasswordsController</code>, we send out an email with directions to reset the password if the said email address does indeed exist in our database.</p>
+<p>Once the user clicks on the link, it will redirect to a page where the user is prompted to enter an email address. Then inside our server side code (specifically, inside the <code>ForgotPasswordsController</code>, we send out an email with directions to reset the password if the said email address does indeed exist in our database.</p>
 
 <p><img class="center" src="http://tsufurukawa-blog.herokuapp.com/images/forgot_password_form.png" width="600" height="260" title="'forgot_password_form'" ></p>
 
