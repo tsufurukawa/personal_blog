@@ -68,7 +68,7 @@ require 'paratrooper'
   end
 ```
 
-The above code is a rake task - put it under __lib/tasks__ directory __deploy.rake__ and tweak it a little so that it uses our own Heroku app names - and performs the following tasks:
+The above code is a rake task - put it under __lib/tasks__ directory as __deploy.rake__ and tweak it so that it uses your own Heroku app name. The code performs the following tasks:
 
 *  Create or update a git tag (if provided)
 *  Push changes to Heroku

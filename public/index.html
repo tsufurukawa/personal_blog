@@ -10,8 +10,8 @@
   <meta name="google-site-verification" content="E0uq1JJts4soIXsCU-Zxj8dzzHjBpVpuxyZIK_uNpbc" />
 
   
-  <meta name="description" content="In the previous post, we discussed how to set up a staging environment that mimics the production environment. One of the few configuration &hellip;">
-  
+  <meta name="description" content="Random Ruby on Rails Knowledge Attained from Online Bootcamp "Tealeaf Academy"">
+  <meta name="keywords" content="Tealeaf Academy, Ruby on Rails">
 
   <!-- http://t.co/dKP3o1e -->
   <meta name="HandheldFriendly" content="True">
@@ -117,7 +117,7 @@
   </header>
 
 
-  <div class="entry-content"><p>In the previous post, we discussed how to set up a staging environment that mimics the production environment. One of the few configuration differences that we&rsquo;ll want to address is the way in which we handle email submission. For example, say we have an application that sends out a welcome email after a user signs up for an account. Of course in production, we want the email to flow straight to the user&rsquo;s inbox; however in staging, we want to prevent spamming our users and instead want the test emails to flow to a designated user &ndash; say an admin. Fortunately in Rails, Action Mailer provides hooks to intercept every mail, which then allows us to make modifications to messages right before they are handed to the delivery agents.</p>
+  <div class="entry-content"><p>In the previous post, we discussed how to set up a staging environment that mimics the production environment. One of the few configuration differences that we&rsquo;ll want to address is the way in which we handle email submission. For example, say we have an application that sends out a welcome email after a user signs up for an account. Of course in production, we want the email to flow straight to the user&rsquo;s inbox; however in staging, we want to prevent spamming our users and instead want the test emails to flow to a designated person &ndash; say an admin. Fortunately in Rails, Action Mailer provides hooks to intercept every mail, which then allows us to make modifications to messages right before they are handed to the delivery agents.</p>
 
 <h4>Email Sending with Action Mailer</h4>
 
@@ -344,7 +344,7 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>The above code is a rake task &ndash; put it under <strong>lib/tasks</strong> directory <strong>deploy.rake</strong> and tweak it a little so that it uses our own Heroku app names &ndash; and performs the following tasks:</p>
+<p>The above code is a rake task &ndash; put it under <strong>lib/tasks</strong> directory as <strong>deploy.rake</strong> and tweak it so that it uses your own Heroku app name. The code performs the following tasks:</p>
 
 <ul>
 <li>Create or update a git tag (if provided)</li>

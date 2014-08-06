@@ -4,7 +4,7 @@
   <title><![CDATA[Tsubasa Furukawa | Web Developer in Training]]></title>
   <link href="http://tsufurukawa-blog.herokuapp.com/atom.xml" rel="self"/>
   <link href="http://tsufurukawa-blog.herokuapp.com/"/>
-  <updated>2014-08-05T20:22:53-07:00</updated>
+  <updated>2014-08-06T09:34:46-07:00</updated>
   <id>http://tsufurukawa-blog.herokuapp.com/</id>
   <author>
     <name><![CDATA[Tsubasa Furukawa]]></name>
@@ -18,7 +18,7 @@
     <link href="http://tsufurukawa-blog.herokuapp.com/blog/2014/07/26/intercepting-emails/"/>
     <updated>2014-07-26T17:55:37-07:00</updated>
     <id>http://tsufurukawa-blog.herokuapp.com/blog/2014/07/26/intercepting-emails</id>
-    <content type="html"><![CDATA[<p>In the previous post, we discussed how to set up a staging environment that mimics the production environment. One of the few configuration differences that we&rsquo;ll want to address is the way in which we handle email submission. For example, say we have an application that sends out a welcome email after a user signs up for an account. Of course in production, we want the email to flow straight to the user&rsquo;s inbox; however in staging, we want to prevent spamming our users and instead want the test emails to flow to a designated user &ndash; say an admin. Fortunately in Rails, Action Mailer provides hooks to intercept every mail, which then allows us to make modifications to messages right before they are handed to the delivery agents.</p>
+    <content type="html"><![CDATA[<p>In the previous post, we discussed how to set up a staging environment that mimics the production environment. One of the few configuration differences that we&rsquo;ll want to address is the way in which we handle email submission. For example, say we have an application that sends out a welcome email after a user signs up for an account. Of course in production, we want the email to flow straight to the user&rsquo;s inbox; however in staging, we want to prevent spamming our users and instead want the test emails to flow to a designated person &ndash; say an admin. Fortunately in Rails, Action Mailer provides hooks to intercept every mail, which then allows us to make modifications to messages right before they are handed to the delivery agents.</p>
 
 <h4>Email Sending with Action Mailer</h4>
 
@@ -218,7 +218,7 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>The above code is a rake task &ndash; put it under <strong>lib/tasks</strong> directory <strong>deploy.rake</strong> and tweak it a little so that it uses our own Heroku app names &ndash; and performs the following tasks:</p>
+<p>The above code is a rake task &ndash; put it under <strong>lib/tasks</strong> directory as <strong>deploy.rake</strong> and tweak it so that it uses your own Heroku app name. The code performs the following tasks:</p>
 
 <ul>
 <li>Create or update a git tag (if provided)</li>
