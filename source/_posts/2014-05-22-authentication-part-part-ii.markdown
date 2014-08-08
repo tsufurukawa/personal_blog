@@ -1,11 +1,11 @@
 ---
 layout: post
-title: "Authentication - Part II"
+title: "Rails Authentication - Part II"
 date: 2014-05-22 21:54:20 -0700
 comments: true
 categories: [Rails, Authentication]
 keywords: Ruby on Rails, Tealeaf Academy, authentication, sessions
-description: Simulating 'login' and 'logout' using authentication and sessions
+description: Simulating 'login' and 'logout' using authentication and sessions in Rails
 ---
 
 In this post, we'll simulate a `login` and `logout` user interface by introducing a concept called `session`. A user's session is tracked using a cookie, which exists only in temporary memory while the user is logged in and navigating the website. When the user logs-out, the session cookie is then destroyed.

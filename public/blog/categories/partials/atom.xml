@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: Partials | Tsubasa Furukawa | Web Developer in Training]]></title>
+  <title><![CDATA[Category: Partials | Tsubasa Furukawa | Web Developer at Tealeaf Academy]]></title>
   <link href="http://tsufurukawa-blog.herokuapp.com/blog/categories/partials/atom.xml" rel="self"/>
   <link href="http://tsufurukawa-blog.herokuapp.com/"/>
-  <updated>2014-08-06T09:52:51-07:00</updated>
+  <updated>2014-08-07T21:50:31-07:00</updated>
   <id>http://tsufurukawa-blog.herokuapp.com/</id>
   <author>
     <name><![CDATA[Tsubasa Furukawa]]></name>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Rails Conventions - Part II]]></title>
-    <link href="http://tsufurukawa-blog.herokuapp.com/blog/2014/05/09/part-ii/"/>
+    <link href="http://tsufurukawa-blog.herokuapp.com/2014-05-09/part-ii/"/>
     <updated>2014-05-09T11:38:40-07:00</updated>
-    <id>http://tsufurukawa-blog.herokuapp.com/blog/2014/05/09/part-ii</id>
+    <id>http://tsufurukawa-blog.herokuapp.com/2014-05-09/part-ii</id>
     <content type="html"><![CDATA[<p>In the previous post we saw that we can pass in a file name such as <code>shared/content_file</code> into a partial, which will then render the <code>_content_file.html.erb</code> file allowing us to create content that is shared among many pages in our application. We can also pass in a local variable such as <code>title</code>, containing dynamic data that changes depending on what value we assign to the variable.</p>
 
 <h4>Rendering Model Instances</h4>
@@ -74,9 +74,9 @@
   
   <entry>
     <title type="html"><![CDATA[Rails Conventions - Part I]]></title>
-    <link href="http://tsufurukawa-blog.herokuapp.com/blog/2014/05/08/rails-resources/"/>
+    <link href="http://tsufurukawa-blog.herokuapp.com/2014-05-08/rails-resources/"/>
     <updated>2014-05-08T22:33:15-07:00</updated>
-    <id>http://tsufurukawa-blog.herokuapp.com/blog/2014/05/08/rails-resources</id>
+    <id>http://tsufurukawa-blog.herokuapp.com/2014-05-08/rails-resources</id>
     <content type="html"><![CDATA[<h4>Some Basic Rails Conventions</h4>
 
 <p>Now, let&rsquo;s talk Rails. Rails is&hellip;interesting, to say the least. It&rsquo;s only been a week since I&rsquo;ve been exposed to the core ideology behind Rails, so I am far from knowing the ins and outs of the language. Rails is centered around the paradigm of <em>Convention Over Configuration</em>, which in layman&rsquo;s terms &ndash; follow the convention and you&rsquo;ll be grateful, and you&rsquo;re screwed if you don&rsquo;t. I think these conventions are what makes everything in Rails seem so magical, while simultaneously confusing. Until you wrap your head around the fact that a lot goes behind the scenes and some things you just have to take for granted, learning Rails could be quite a challenge.</p>

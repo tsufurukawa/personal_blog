@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: Email | Tsubasa Furukawa | Web Developer in Training]]></title>
+  <title><![CDATA[Category: Email | Tsubasa Furukawa | Web Developer at Tealeaf Academy]]></title>
   <link href="http://tsufurukawa-blog.herokuapp.com/blog/categories/email/atom.xml" rel="self"/>
   <link href="http://tsufurukawa-blog.herokuapp.com/"/>
-  <updated>2014-08-06T09:52:51-07:00</updated>
+  <updated>2014-08-07T21:50:31-07:00</updated>
   <id>http://tsufurukawa-blog.herokuapp.com/</id>
   <author>
     <name><![CDATA[Tsubasa Furukawa]]></name>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Action Mailer and Intercepting Emails]]></title>
-    <link href="http://tsufurukawa-blog.herokuapp.com/blog/2014/07/26/intercepting-emails/"/>
+    <link href="http://tsufurukawa-blog.herokuapp.com/2014-07-26/intercepting-emails/"/>
     <updated>2014-07-26T17:55:37-07:00</updated>
-    <id>http://tsufurukawa-blog.herokuapp.com/blog/2014/07/26/intercepting-emails</id>
+    <id>http://tsufurukawa-blog.herokuapp.com/2014-07-26/intercepting-emails</id>
     <content type="html"><![CDATA[<p>In the previous post, we discussed how to set up a staging environment that mimics the production environment. One of the few configuration differences that we&rsquo;ll want to address is the way in which we handle email submission. For example, say we have an application that sends out a welcome email after a user signs up for an account. Of course in production, we want the email to flow straight to the user&rsquo;s inbox; however in staging, we want to prevent spamming our users and instead want the test emails to flow to a designated person &ndash; say an admin. Fortunately in Rails, Action Mailer provides hooks to intercept every mail, which then allows us to make modifications to messages right before they are handed to the delivery agents.</p>
 
 <h4>Email Sending with Action Mailer</h4>

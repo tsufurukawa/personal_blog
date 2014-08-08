@@ -5,7 +5,7 @@ date: 2014-07-26 17:55:37 -0700
 comments: true
 categories: [Email, Rails]
 keywords: Ruby on Rails, Tealeaf Academy, staging, ActionMailer, interceptor
-description: Using interceptors for sending emails in staging
+description: Using Action Mailer interceptors for sending emails in staging
 ---
 
 In the previous post, we discussed how to set up a staging environment that mimics the production environment. One of the few configuration differences that we'll want to address is the way in which we handle email submission. For example, say we have an application that sends out a welcome email after a user signs up for an account. Of course in production, we want the email to flow straight to the user's inbox; however in staging, we want to prevent spamming our users and instead want the test emails to flow to a designated person - say an admin. Fortunately in Rails, Action Mailer provides hooks to intercept every mail, which then allows us to make modifications to messages right before they are handed to the delivery agents.

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: Capybara | Tsubasa Furukawa | Web Developer in Training]]></title>
+  <title><![CDATA[Category: Capybara | Tsubasa Furukawa | Web Developer at Tealeaf Academy]]></title>
   <link href="http://tsufurukawa-blog.herokuapp.com/blog/categories/capybara/atom.xml" rel="self"/>
   <link href="http://tsufurukawa-blog.herokuapp.com/"/>
-  <updated>2014-08-06T09:52:51-07:00</updated>
+  <updated>2014-08-07T21:50:31-07:00</updated>
   <id>http://tsufurukawa-blog.herokuapp.com/</id>
   <author>
     <name><![CDATA[Tsubasa Furukawa]]></name>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Feature Spec With Capybara]]></title>
-    <link href="http://tsufurukawa-blog.herokuapp.com/blog/2014/06/22/feature-spec-with-capybara/"/>
+    <link href="http://tsufurukawa-blog.herokuapp.com/2014-06-22/feature-spec-with-capybara/"/>
     <updated>2014-06-22T21:19:29-07:00</updated>
-    <id>http://tsufurukawa-blog.herokuapp.com/blog/2014/06/22/feature-spec-with-capybara</id>
+    <id>http://tsufurukawa-blog.herokuapp.com/2014-06-22/feature-spec-with-capybara</id>
     <content type="html"><![CDATA[<p>When designing a web application, or any computer software for that matter, having automated tests is absolutely critical. In general, tests can be broken down into 3 categories:</p>
 
 <p><strong>1. Unit Tests</strong> &ndash; testing different components in isolation. <br/>

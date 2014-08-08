@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Authentication - Part I"
+title: "Rails Authentication - Part I"
 date: 2014-05-22 20:15:01 -0700
 comments: true
 categories: [Rails, Authentication]

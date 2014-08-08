@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: Heroku | Tsubasa Furukawa | Web Developer in Training]]></title>
+  <title><![CDATA[Category: Heroku | Tsubasa Furukawa | Web Developer at Tealeaf Academy]]></title>
   <link href="http://tsufurukawa-blog.herokuapp.com/blog/categories/heroku/atom.xml" rel="self"/>
   <link href="http://tsufurukawa-blog.herokuapp.com/"/>
-  <updated>2014-08-06T09:52:51-07:00</updated>
+  <updated>2014-08-07T21:50:31-07:00</updated>
   <id>http://tsufurukawa-blog.herokuapp.com/</id>
   <author>
     <name><![CDATA[Tsubasa Furukawa]]></name>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Deployment Pipeline]]></title>
-    <link href="http://tsufurukawa-blog.herokuapp.com/blog/2014/07/25/deployment-pipeline/"/>
+    <link href="http://tsufurukawa-blog.herokuapp.com/2014-07-25/deployment-pipeline/"/>
     <updated>2014-07-25T09:40:40-07:00</updated>
-    <id>http://tsufurukawa-blog.herokuapp.com/blog/2014/07/25/deployment-pipeline</id>
+    <id>http://tsufurukawa-blog.herokuapp.com/2014-07-25/deployment-pipeline</id>
     <content type="html"><![CDATA[<h4>Background</h4>
 
 <p><em>Deployment pipeline</em> is the process of breaking up automated deployment steps to ensure bugs are detected and broken features are addressed before an application is set to production. A web application typically runs on three environments: <em>development environment</em> running on a developer&rsquo;s local machine, <em>test environment</em> for running tests, and <em>production environment</em> where real users interact with the application. The underlying problem with this setup is that there&rsquo;s no guarantee code that works flawlessly in local development environment will work the same when deployed to production. That is, development and production environments are inherently different with different configurations, so deploying straight to production from development is a risky process.</p>

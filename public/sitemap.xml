@@ -1,60 +1,56 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>
     <url>
-        <loc>http://tsufurukawa-blog.herokuapp.com/blog/2014/05/08/my-first-post/</loc>
+        <loc>http://tsufurukawa-blog.herokuapp.com/2014-05-08/my-first-post/</loc>
         <lastmod>2014-08-05T12:24:58-07:00</lastmod>
     </url>
     <url>
-        <loc>http://tsufurukawa-blog.herokuapp.com/blog/2014/05/08/rails-resources/</loc>
+        <loc>http://tsufurukawa-blog.herokuapp.com/2014-05-08/rails-resources/</loc>
         <lastmod>2014-08-05T12:25:48-07:00</lastmod>
     </url>
     <url>
-        <loc>http://tsufurukawa-blog.herokuapp.com/blog/2014/05/09/part-ii/</loc>
+        <loc>http://tsufurukawa-blog.herokuapp.com/2014-05-09/part-ii/</loc>
         <lastmod>2014-08-05T12:26:10-07:00</lastmod>
     </url>
     <url>
-        <loc>http://tsufurukawa-blog.herokuapp.com/blog/2014/05/13/rails-forms/</loc>
+        <loc>http://tsufurukawa-blog.herokuapp.com/2014-05-13/rails-forms/</loc>
         <lastmod>2014-08-05T12:27:30-07:00</lastmod>
     </url>
     <url>
-        <loc>http://tsufurukawa-blog.herokuapp.com/blog/2014/05/13/part-ii-rails-forms/</loc>
+        <loc>http://tsufurukawa-blog.herokuapp.com/2014-05-13/part-ii-rails-forms/</loc>
         <lastmod>2014-08-05T12:28:15-07:00</lastmod>
     </url>
     <url>
-        <loc>http://tsufurukawa-blog.herokuapp.com/blog/2014/05/22/authentication/</loc>
-        <lastmod>2014-08-05T12:30:17-07:00</lastmod>
+        <loc>http://tsufurukawa-blog.herokuapp.com/2014-05-22/authentication/</loc>
+        <lastmod>2014-08-07T21:49:42-07:00</lastmod>
     </url>
     <url>
-        <loc>
-            http://tsufurukawa-blog.herokuapp.com/blog/2014/05/22/authentication-part-part-ii/
-        </loc>
-        <lastmod>2014-08-05T12:29:29-07:00</lastmod>
+        <loc>http://tsufurukawa-blog.herokuapp.com/2014-05-22/authentication-part-part-ii/</loc>
+        <lastmod>2014-08-07T21:49:34-07:00</lastmod>
     </url>
     <url>
-        <loc>http://tsufurukawa-blog.herokuapp.com/blog/2014/06/01/rails-flavored-ajax/</loc>
+        <loc>http://tsufurukawa-blog.herokuapp.com/2014-06-01/rails-flavored-ajax/</loc>
         <lastmod>2014-08-05T12:31:31-07:00</lastmod>
     </url>
     <url>
-        <loc>
-            http://tsufurukawa-blog.herokuapp.com/blog/2014/06/22/feature-spec-with-capybara/
-        </loc>
+        <loc>http://tsufurukawa-blog.herokuapp.com/2014-06-22/feature-spec-with-capybara/</loc>
         <lastmod>2014-08-05T20:07:20-07:00</lastmod>
     </url>
     <url>
-        <loc>http://tsufurukawa-blog.herokuapp.com/blog/2014/07/25/deployment-pipeline/</loc>
+        <loc>http://tsufurukawa-blog.herokuapp.com/2014-07-25/deployment-pipeline/</loc>
         <lastmod>2014-08-06T09:34:24-07:00</lastmod>
     </url>
     <url>
-        <loc>http://tsufurukawa-blog.herokuapp.com/blog/2014/07/26/intercepting-emails/</loc>
-        <lastmod>2014-08-06T09:48:48-07:00</lastmod>
+        <loc>http://tsufurukawa-blog.herokuapp.com/2014-07-26/intercepting-emails/</loc>
+        <lastmod>2014-08-07T21:50:15-07:00</lastmod>
     </url>
     <url>
         <loc>http://tsufurukawa-blog.herokuapp.com/blog/archives/</loc>
-        <lastmod>2014-08-06T09:48:48-07:00</lastmod>
+        <lastmod>2014-08-07T21:50:15-07:00</lastmod>
     </url>
     <url>
         <loc>http://tsufurukawa-blog.herokuapp.com/</loc>
-        <lastmod>2014-08-06T09:48:48-07:00</lastmod>
+        <lastmod>2014-08-07T21:50:15-07:00</lastmod>
     </url>
     <url>
         <loc>http://tsufurukawa-blog.herokuapp.com/robots.txt</loc>
