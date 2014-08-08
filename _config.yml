@@ -3,9 +3,9 @@
 # ----------------------- #
 
 url: http://tsufurukawa-blog.herokuapp.com
-subtitle: something
-title: something else
-author: chris kang
+subtitle: Learning Ruby on Rails
+title: Tsubasa Furukawa | Web Developer at Tealeaf Academy
+author: Tsubasa Furukawa
 simple_search: https://www.google.com/search
 keywords: Tealeaf Academy, Ruby on Rails, web development bootcamp
 description: Random Ruby on Rails Knowledge Attained from Online Bootcamp Tealeaf Academy
@@ -28,7 +28,7 @@ email:
 
 # If publishing to a subdirectory as in http://site.com/project set 'root: /project'
 root:
-permalink: /:year
+permalink: /:year-:month-:day/:title/
 source: source
 destination: public
 plugins: plugins

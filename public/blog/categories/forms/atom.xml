@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: Forms | something else]]></title>
+  <title><![CDATA[Category: Forms | Tsubasa Furukawa | Web Developer at Tealeaf Academy]]></title>
   <link href="http://tsufurukawa-blog.herokuapp.com/blog/categories/forms/atom.xml" rel="self"/>
   <link href="http://tsufurukawa-blog.herokuapp.com/"/>
-  <updated>2014-08-07T22:17:12-07:00</updated>
+  <updated>2014-08-07T22:19:29-07:00</updated>
   <id>http://tsufurukawa-blog.herokuapp.com/</id>
   <author>
-    <name><![CDATA[chris kang]]></name>
+    <name><![CDATA[Tsubasa Furukawa]]></name>
     
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Rails Forms - Part II]]></title>
-    <link href="http://tsufurukawa-blog.herokuapp.com/2014"/>
+    <link href="http://tsufurukawa-blog.herokuapp.com/2014-05-13/part-ii-rails-forms/"/>
     <updated>2014-05-13T22:41:29-07:00</updated>
-    <id>http://tsufurukawa-blog.herokuapp.com/part-ii-rails-forms</id>
+    <id>http://tsufurukawa-blog.herokuapp.com/2014-05-13/part-ii-rails-forms</id>
     <content type="html"><![CDATA[<p>In the last post, we discussed how to generate forms, how the parameters are stored inside a <code>params</code> hash, and where the form is submitted to. In this post, we talk about how to handle the form submission using validations and strong parameters.</p>
 
 <h4>Strong Parameters</h4>
@@ -116,9 +116,9 @@ end
   
   <entry>
     <title type="html"><![CDATA[Rails Forms - Part I]]></title>
-    <link href="http://tsufurukawa-blog.herokuapp.com/2014"/>
+    <link href="http://tsufurukawa-blog.herokuapp.com/2014-05-13/rails-forms/"/>
     <updated>2014-05-13T19:55:35-07:00</updated>
-    <id>http://tsufurukawa-blog.herokuapp.com/rails-forms</id>
+    <id>http://tsufurukawa-blog.herokuapp.com/2014-05-13/rails-forms</id>
     <content type="html"><![CDATA[<p>In general, there are 3 ways to create and handle forms in Rails: pure html, form helpers, and model-backed form helpers.</p>
 
 <h4>Pure HTML Way</h4>

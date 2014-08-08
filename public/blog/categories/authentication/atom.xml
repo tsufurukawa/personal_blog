@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: Authentication | something else]]></title>
+  <title><![CDATA[Category: Authentication | Tsubasa Furukawa | Web Developer at Tealeaf Academy]]></title>
   <link href="http://tsufurukawa-blog.herokuapp.com/blog/categories/authentication/atom.xml" rel="self"/>
   <link href="http://tsufurukawa-blog.herokuapp.com/"/>
-  <updated>2014-08-07T22:17:12-07:00</updated>
+  <updated>2014-08-07T22:19:29-07:00</updated>
   <id>http://tsufurukawa-blog.herokuapp.com/</id>
   <author>
-    <name><![CDATA[chris kang]]></name>
+    <name><![CDATA[Tsubasa Furukawa]]></name>
     
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Rails Authentication - Part II]]></title>
-    <link href="http://tsufurukawa-blog.herokuapp.com/2014"/>
+    <link href="http://tsufurukawa-blog.herokuapp.com/2014-05-22/authentication-part-part-ii/"/>
     <updated>2014-05-22T21:54:20-07:00</updated>
-    <id>http://tsufurukawa-blog.herokuapp.com/authentication-part-part-ii</id>
+    <id>http://tsufurukawa-blog.herokuapp.com/2014-05-22/authentication-part-part-ii</id>
     <content type="html"><![CDATA[<p>In this post, we&rsquo;ll simulate a <code>login</code> and <code>logout</code> user interface by introducing a concept called <code>session</code>. A user&rsquo;s session is tracked using a cookie, which exists only in temporary memory while the user is logged in and navigating the website. When the user logs-out, the session cookie is then destroyed.</p>
 
 <h4>Simulating the Login</h4>
@@ -156,9 +156,9 @@ end
   
   <entry>
     <title type="html"><![CDATA[Rails Authentication - Part I]]></title>
-    <link href="http://tsufurukawa-blog.herokuapp.com/2014"/>
+    <link href="http://tsufurukawa-blog.herokuapp.com/2014-05-22/authentication/"/>
     <updated>2014-05-22T20:15:01-07:00</updated>
-    <id>http://tsufurukawa-blog.herokuapp.com/authentication</id>
+    <id>http://tsufurukawa-blog.herokuapp.com/2014-05-22/authentication</id>
     <content type="html"><![CDATA[<h4>How Password Authentication Works</h4>
 
 <p>The theory behind how authentication works in Rails is pretty straightforward. We save passwords through a <em>1-way hash</em>, meaning that we hash some string (ie. when user first registers) into a long undecipherable hash token. We then perform authentication, not by decrypting this hash token, but rather by hashing another string (ie. when user logs in) and then checking if the two hashes match.</p>

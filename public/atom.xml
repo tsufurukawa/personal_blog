@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[something else]]></title>
+  <title><![CDATA[Tsubasa Furukawa | Web Developer at Tealeaf Academy]]></title>
   <link href="http://tsufurukawa-blog.herokuapp.com/atom.xml" rel="self"/>
   <link href="http://tsufurukawa-blog.herokuapp.com/"/>
-  <updated>2014-08-07T22:17:12-07:00</updated>
+  <updated>2014-08-07T22:19:29-07:00</updated>
   <id>http://tsufurukawa-blog.herokuapp.com/</id>
   <author>
-    <name><![CDATA[chris kang]]></name>
+    <name><![CDATA[Tsubasa Furukawa]]></name>
     
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Action Mailer and Intercepting Emails]]></title>
-    <link href="http://tsufurukawa-blog.herokuapp.com/2014"/>
+    <link href="http://tsufurukawa-blog.herokuapp.com/2014-07-26/intercepting-emails/"/>
     <updated>2014-07-26T17:55:37-07:00</updated>
-    <id>http://tsufurukawa-blog.herokuapp.com/intercepting-emails</id>
+    <id>http://tsufurukawa-blog.herokuapp.com/2014-07-26/intercepting-emails</id>
     <content type="html"><![CDATA[<p>In the previous post, we discussed how to set up a staging environment that mimics the production environment. One of the few configuration differences that we&rsquo;ll want to address is the way in which we handle email submission. For example, say we have an application that sends out a welcome email after a user signs up for an account. Of course in production, we want the email to flow straight to the user&rsquo;s inbox; however in staging, we want to prevent spamming our users and instead want the test emails to flow to a designated person &ndash; say an admin. Fortunately in Rails, Action Mailer provides hooks to intercept every mail, which then allows us to make modifications to messages right before they are handed to the delivery agents.</p>
 
 <h4>Email Sending with Action Mailer</h4>
@@ -125,9 +125,9 @@
   
   <entry>
     <title type="html"><![CDATA[Deployment Pipeline]]></title>
-    <link href="http://tsufurukawa-blog.herokuapp.com/2014"/>
+    <link href="http://tsufurukawa-blog.herokuapp.com/2014-07-25/deployment-pipeline/"/>
     <updated>2014-07-25T09:40:40-07:00</updated>
-    <id>http://tsufurukawa-blog.herokuapp.com/deployment-pipeline</id>
+    <id>http://tsufurukawa-blog.herokuapp.com/2014-07-25/deployment-pipeline</id>
     <content type="html"><![CDATA[<h4>Background</h4>
 
 <p><em>Deployment pipeline</em> is the process of breaking up automated deployment steps to ensure bugs are detected and broken features are addressed before an application is set to production. A web application typically runs on three environments: <em>development environment</em> running on a developer&rsquo;s local machine, <em>test environment</em> for running tests, and <em>production environment</em> where real users interact with the application. The underlying problem with this setup is that there&rsquo;s no guarantee code that works flawlessly in local development environment will work the same when deployed to production. That is, development and production environments are inherently different with different configurations, so deploying straight to production from development is a risky process.</p>
@@ -256,9 +256,9 @@
   
   <entry>
     <title type="html"><![CDATA[Feature Spec With Capybara]]></title>
-    <link href="http://tsufurukawa-blog.herokuapp.com/2014"/>
+    <link href="http://tsufurukawa-blog.herokuapp.com/2014-06-22/feature-spec-with-capybara/"/>
     <updated>2014-06-22T21:19:29-07:00</updated>
-    <id>http://tsufurukawa-blog.herokuapp.com/feature-spec-with-capybara</id>
+    <id>http://tsufurukawa-blog.herokuapp.com/2014-06-22/feature-spec-with-capybara</id>
     <content type="html"><![CDATA[<p>When designing a web application, or any computer software for that matter, having automated tests is absolutely critical. In general, tests can be broken down into 3 categories:</p>
 
 <p><strong>1. Unit Tests</strong> &ndash; testing different components in isolation. <br/>
@@ -456,9 +456,9 @@
   
   <entry>
     <title type="html"><![CDATA[Rails Flavored Ajax]]></title>
-    <link href="http://tsufurukawa-blog.herokuapp.com/2014"/>
+    <link href="http://tsufurukawa-blog.herokuapp.com/2014-06-01/rails-flavored-ajax/"/>
     <updated>2014-06-01T18:28:07-07:00</updated>
-    <id>http://tsufurukawa-blog.herokuapp.com/rails-flavored-ajax</id>
+    <id>http://tsufurukawa-blog.herokuapp.com/2014-06-01/rails-flavored-ajax</id>
     <content type="html"><![CDATA[<h4>Unobtrusive Javascript to Handle Ajax</h4>
 
 <p>Ajax stands for Asynchronous Javascript and XML and is a way of sending and retrieving data from a server asynchronously. This is particularly useful when we have a page that is very expensive to load, and we want to update a small portion of the UI without having to reload the entire page from scratch. The basic ajax pattern consists of 3 parts:</p>
@@ -570,9 +570,9 @@ Since <code>remote: true</code> ajaxified the form, the client is expecting a ja
   
   <entry>
     <title type="html"><![CDATA[Rails Authentication - Part II]]></title>
-    <link href="http://tsufurukawa-blog.herokuapp.com/2014"/>
+    <link href="http://tsufurukawa-blog.herokuapp.com/2014-05-22/authentication-part-part-ii/"/>
     <updated>2014-05-22T21:54:20-07:00</updated>
-    <id>http://tsufurukawa-blog.herokuapp.com/authentication-part-part-ii</id>
+    <id>http://tsufurukawa-blog.herokuapp.com/2014-05-22/authentication-part-part-ii</id>
     <content type="html"><![CDATA[<p>In this post, we&rsquo;ll simulate a <code>login</code> and <code>logout</code> user interface by introducing a concept called <code>session</code>. A user&rsquo;s session is tracked using a cookie, which exists only in temporary memory while the user is logged in and navigating the website. When the user logs-out, the session cookie is then destroyed.</p>
 
 <h4>Simulating the Login</h4>
@@ -752,9 +752,9 @@ Since <code>remote: true</code> ajaxified the form, the client is expecting a ja
   
   <entry>
     <title type="html"><![CDATA[Rails Authentication - Part I]]></title>
-    <link href="http://tsufurukawa-blog.herokuapp.com/2014"/>
+    <link href="http://tsufurukawa-blog.herokuapp.com/2014-05-22/authentication/"/>
     <updated>2014-05-22T20:15:01-07:00</updated>
-    <id>http://tsufurukawa-blog.herokuapp.com/authentication</id>
+    <id>http://tsufurukawa-blog.herokuapp.com/2014-05-22/authentication</id>
     <content type="html"><![CDATA[<h4>How Password Authentication Works</h4>
 
 <p>The theory behind how authentication works in Rails is pretty straightforward. We save passwords through a <em>1-way hash</em>, meaning that we hash some string (ie. when user first registers) into a long undecipherable hash token. We then perform authentication, not by decrypting this hash token, but rather by hashing another string (ie. when user logs in) and then checking if the two hashes match.</p>
@@ -821,9 +821,9 @@ Since <code>remote: true</code> ajaxified the form, the client is expecting a ja
   
   <entry>
     <title type="html"><![CDATA[Rails Forms - Part II]]></title>
-    <link href="http://tsufurukawa-blog.herokuapp.com/2014"/>
+    <link href="http://tsufurukawa-blog.herokuapp.com/2014-05-13/part-ii-rails-forms/"/>
     <updated>2014-05-13T22:41:29-07:00</updated>
-    <id>http://tsufurukawa-blog.herokuapp.com/part-ii-rails-forms</id>
+    <id>http://tsufurukawa-blog.herokuapp.com/2014-05-13/part-ii-rails-forms</id>
     <content type="html"><![CDATA[<p>In the last post, we discussed how to generate forms, how the parameters are stored inside a <code>params</code> hash, and where the form is submitted to. In this post, we talk about how to handle the form submission using validations and strong parameters.</p>
 
 <h4>Strong Parameters</h4>
@@ -949,9 +949,9 @@ Since <code>remote: true</code> ajaxified the form, the client is expecting a ja
   
   <entry>
     <title type="html"><![CDATA[Rails Forms - Part I]]></title>
-    <link href="http://tsufurukawa-blog.herokuapp.com/2014"/>
+    <link href="http://tsufurukawa-blog.herokuapp.com/2014-05-13/rails-forms/"/>
     <updated>2014-05-13T19:55:35-07:00</updated>
-    <id>http://tsufurukawa-blog.herokuapp.com/rails-forms</id>
+    <id>http://tsufurukawa-blog.herokuapp.com/2014-05-13/rails-forms</id>
     <content type="html"><![CDATA[<p>In general, there are 3 ways to create and handle forms in Rails: pure html, form helpers, and model-backed form helpers.</p>
 
 <h4>Pure HTML Way</h4>
@@ -1048,9 +1048,9 @@ Since <code>remote: true</code> ajaxified the form, the client is expecting a ja
   
   <entry>
     <title type="html"><![CDATA[Rails Conventions - Part II]]></title>
-    <link href="http://tsufurukawa-blog.herokuapp.com/2014"/>
+    <link href="http://tsufurukawa-blog.herokuapp.com/2014-05-09/part-ii/"/>
     <updated>2014-05-09T11:38:40-07:00</updated>
-    <id>http://tsufurukawa-blog.herokuapp.com/part-ii</id>
+    <id>http://tsufurukawa-blog.herokuapp.com/2014-05-09/part-ii</id>
     <content type="html"><![CDATA[<p>In the previous post we saw that we can pass in a file name such as <code>shared/content_file</code> into a partial, which will then render the <code>_content_file.html.erb</code> file allowing us to create content that is shared among many pages in our application. We can also pass in a local variable such as <code>title</code>, containing dynamic data that changes depending on what value we assign to the variable.</p>
 
 <h4>Rendering Model Instances</h4>
@@ -1117,9 +1117,9 @@ Since <code>remote: true</code> ajaxified the form, the client is expecting a ja
   
   <entry>
     <title type="html"><![CDATA[Rails Conventions - Part I]]></title>
-    <link href="http://tsufurukawa-blog.herokuapp.com/2014"/>
+    <link href="http://tsufurukawa-blog.herokuapp.com/2014-05-08/rails-resources/"/>
     <updated>2014-05-08T22:33:15-07:00</updated>
-    <id>http://tsufurukawa-blog.herokuapp.com/rails-resources</id>
+    <id>http://tsufurukawa-blog.herokuapp.com/2014-05-08/rails-resources</id>
     <content type="html"><![CDATA[<h4>Some Basic Rails Conventions</h4>
 
 <p>Now, let&rsquo;s talk Rails. Rails is&hellip;interesting, to say the least. It&rsquo;s only been a week since I&rsquo;ve been exposed to the core ideology behind Rails, so I am far from knowing the ins and outs of the language. Rails is centered around the paradigm of <em>Convention Over Configuration</em>, which in layman&rsquo;s terms &ndash; follow the convention and you&rsquo;ll be grateful, and you&rsquo;re screwed if you don&rsquo;t. I think these conventions are what makes everything in Rails seem so magical, while simultaneously confusing. Until you wrap your head around the fact that a lot goes behind the scenes and some things you just have to take for granted, learning Rails could be quite a challenge.</p>
@@ -1192,9 +1192,9 @@ Since <code>remote: true</code> ajaxified the form, the client is expecting a ja
   
   <entry>
     <title type="html"><![CDATA[My First Blog Post]]></title>
-    <link href="http://tsufurukawa-blog.herokuapp.com/2014"/>
+    <link href="http://tsufurukawa-blog.herokuapp.com/2014-05-08/my-first-post/"/>
     <updated>2014-05-08T01:24:34-07:00</updated>
-    <id>http://tsufurukawa-blog.herokuapp.com/my-first-post</id>
+    <id>http://tsufurukawa-blog.herokuapp.com/2014-05-08/my-first-post</id>
     <content type="html"><![CDATA[<h4>A Little About Me</h4>
 
 <p>I&rsquo;m a basketball guy. I love playing ball, I love watching the Lakers, and I love playing fantasy basketball. In fact I love basketball so much that I&rsquo;m doing just that as I&rsquo;m writing this blog &ndash; watching Game 2 of Portland vs. San Antonio series. Well, it turns out my sentiments towards programming is just about the opposite. Or more precisely, it <em>was</em>. When I took my first progamming class 6 years ago, I was so lost, so frustrated and so annoyed, that I ended up with a C in the class. Granted, it was a C++ course, which by far is the hardest language I&rsquo;ve ever learned (let&rsquo;s face it, it&rsquo;s like Ruby on steroids), but to a guy who&rsquo;s never seen that infamous letter all throughout his educational career, getting a C was as big a surprise as the Spurs losing Game 6 of last year&rsquo;s NBA finals. Pardon me if I sounded a bit nerdy there. Point is, programming and I were like oil and water. We just didn&rsquo;t mix.</p>
