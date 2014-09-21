@@ -8,7 +8,7 @@ keywords: Ruby on Rails, Tealeaf Academy, staging, ActionMailer, interceptor
 description: Using Action Mailer interceptors for sending emails in staging
 ---
 
-In the previous post, we discussed how to set up a staging environment that mimics the production environment. One of the few configuration differences that we'll want to address is the way in which we handle email submission. For example, say we have an application that sends out a welcome email after a user signs up for an account. Of course in production, we want the email to flow straight to the user's inbox; however in staging, we want to prevent spamming our users and instead want the test emails to flow to a designated person - say an admin. Fortunately in Rails, Action Mailer provides hooks to intercept every mail, which then allows us to make modifications to messages right before they are handed to the delivery agents.
+In the previous post, we discussed how to set up a staging environment that mimics the production environment. One of the few configuration differences that we'll want to address is the way in which we handle email submission. For example, say we have an application that sends out a welcome email after a user signs up for an account. Of course in production, we want the email to flow straight to the user's inbox; however in staging, we want to prevent spamming our users and instead want the test emails to flow to a designated person - say an admin. Fortunately in Rails, Action Mailer provides hooks to intercept every mail, which then allows us to make modifications to messages right before they are handed over to the delivery agents.
 
 ####Email Sending with Action Mailer
 Going back to the example described above, we send out a welcome email after a user registers. The method that accomplishes this is defined inside __app/mailers/app_mailer.rb__:
@@ -77,4 +77,10 @@ The conditional at the end is important because we only want the inteceptor to g
 
 ####Summary
 In this post, we discussed how to send an email using the Action Mailer framework. Then we used interceptors to filter all test emails in staging to the admin user's inbox.
+
+##Aside
+I haven't posted any quotes recently, so here's one from my idol growing up.
+
+> “Everything negative – pressure, challenges – is all an opportunity for me to rise..” 
+> <cite><sub> - Kobe Bryant</sub></cite>
 
