@@ -81,6 +81,6 @@ In this post, we discussed how to send an email using the Action Mailer framewor
 ##Aside
 I haven't posted any quotes recently, so here's one from my idol growing up.
 
-> “Everything negative – pressure, challenges – is all an opportunity for me to rise..” 
+> “Everything negative – pressure, challenges – is all an opportunity for me to rise.” 
 > <cite><sub> - Kobe Bryant</sub></cite>
 
